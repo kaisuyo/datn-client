@@ -1,25 +1,22 @@
-import logo from './logo.svg';
 import './App.css';
+import 'antd/dist/reset.css';
+import PageIndex from './component/page/PageIndex';
+import { createContext, useState } from 'react';
+
+const AppContext = createContext()
 
 function App() {
+  const [user, setUser] = useState()
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <AppContext.Provider value={{user, setUser}}>
+        <PageIndex />
+      </AppContext.Provider>
     </div>
   );
 }
+
+export {AppContext}
 
 export default App;
