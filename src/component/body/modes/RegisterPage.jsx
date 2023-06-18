@@ -10,7 +10,7 @@ const RegisterContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 150px;
+  padding-top: 120px;
 `;
 
 const RegisterFormStyled = styled(Form)`
@@ -44,22 +44,7 @@ const RegisterPage = () => {
         console.error(e)
         toastr.error("Đã có lỗi xử lý server")
       })
-    },
-    // createAdmin: (createAdminData) => {
-    //   API.post('/users/createAdmin', createAdminData).then(res => {
-    //     if (res.data.value) {
-    //       toastr.info("Đã tạo tài khoản admin thành công")
-    //     } else {
-    //       toastr.error(res.data.message)
-    //     }
-    //   }).catch(e => {
-    //     console.error(e)
-    //     toastr.error("Đã có lỗi xử lý server")
-    //   })
-    // },
-    // getAccount: () => {
-
-    // }
+    }
   }
   const onFinish = (values) => {
     services.signUp(values)

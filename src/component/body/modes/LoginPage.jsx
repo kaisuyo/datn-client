@@ -11,7 +11,7 @@ const LoginContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 150px;
+  padding-top: 120px;
 `;
 
 const LoginFormStyled = styled(Form)`
@@ -38,11 +38,11 @@ const LoginPage = () => {
         if (res.data.value) {
           setUser(res.data.value)
         } else {
-          toastr.error(res.data.message)
+          toastr.error("Đăng nhập thất bại")
         }
       }).catch(e => {
         console.error(e)
-        toastr.error("Đã có lỗi xử lý server")
+        toastr.error("Đăng nhập thất bại")
       })
     }
   }

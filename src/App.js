@@ -5,11 +5,9 @@ import PageIndex from './component/PageIndex';
 
 function App() {
   return (
-    <div className="App">
-      <AppContext>
-        <PageIndex />
-      </AppContext>
-    </div>
+    <AppContext>
+      <PageIndex />
+    </AppContext>
   );
 }
 export default App;

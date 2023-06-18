@@ -1,9 +1,8 @@
-import API from '../../context/config'
 import styled from 'styled-components'
 
 const BodyStyled = styled.div`
-  margin-top: 68px;
   width: 100vw;
+  padding-top: 36px;
 `
 
 export default function Body(props) {

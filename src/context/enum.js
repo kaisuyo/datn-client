@@ -7,7 +7,8 @@ const ACTION = {
 const ROLE = {
   USER: 0,
   SUPER_USER: 1,
-  SYSTEM_USER: 2,
+  ADMIN: 2,
+  SYSTEM_USER: 3,
 }
 
 const FUNC = {
@@ -17,8 +18,9 @@ const FUNC = {
   ALL_COURSES: 0,
   SELF_COURSES: 1,
   SUBJECTS: 2,
-  USERS: 3,
-  SUGGEST: 4
+  ADMINS: 3,
+  COURSE_SOURCE: 4,
+  SUGGEST: 5
 }
 
 export {ACTION, ROLE, FUNC}
