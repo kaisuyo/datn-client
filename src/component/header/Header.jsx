@@ -14,6 +14,7 @@ const HeaderStyled = styled.div`
   background: #2424f8;
   display: flex;
   justify-content: space-between;
+  z-index: 10000;
 
   .func-area {
     display: flex;
