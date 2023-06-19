@@ -6,7 +6,9 @@ import API from '../../../context/config'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Card, List, Space, Tabs } from 'antd'
+import { Button, Card, List, Space, Tabs, Typography } from 'antd'
+
+const { Paragraph } = Typography
 
 const SelfCourseStyled = styled.div`
   padding: 8px 16px;
@@ -30,6 +32,8 @@ export default function SelfCourses() {
   ]
 
   const [selectedId, setSelectId] = useState(null)
+  const [newTitle, setNewTitle] = useState("")
+  const [newDescription, setNewDescription] = useState("")
 
   const [courses, setCourses] = useState([])
 
@@ -46,6 +50,25 @@ export default function SelfCourses() {
     })
   }, [])
 
+  useEffect(() => {
+    if (selectedId !== null) {
+      if (selectedId !== 0) {
+        API.get(`/courses/get/${selectedId}`).then(res => {
+          if (res.data.value) {
+            const { title, description } = res.data.value
+            setNewTitle(title)
+            setNewDescription(description)
+          } else {
+            toastr.error(res.data.message)
+          }
+        }).catch(e => {
+          console.error(e)
+          toastr.error("Có lỗi trong quá trình xử lý")
+        })
+      }
+    }
+  }, [selectedId])
+
   const handleCreateCourse = (values) => {
     API.post("/courses/create", values).then(res => {
       if (res.data.value) {
@@ -59,12 +82,18 @@ export default function SelfCourses() {
     })
   }
 
+
   return (
     <SelfCourseStyled>
       <Space>
         <Button type="primary" onClick={() => setSelectId(0)}>Tạo khóa học</Button>
       </Space>
       {selectedId != null && <div className="course-selected">
+        <Space>
+          <Paragraph
+            editable={{onChange: setNewTitle}}
+          >{newTitle}</Paragraph>
+        </Space>
         <Tabs tabPosition='left' items={items}/>
       </div>}
       <div className="courses">
@@ -89,3 +118,4 @@ export default function SelfCourses() {
     </SelfCourseStyled>
   )
 }
+
