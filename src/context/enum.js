@@ -23,4 +23,11 @@ const FUNC = {
   SUGGEST: 5
 }
 
-export {ACTION, ROLE, FUNC}
+const COURSE_STATUS = {
+  N0: -2,
+  BLOCK: -1,
+  WAIT: 0,
+  ALOW: 1
+}
+
+export {ACTION, ROLE, FUNC, COURSE_STATUS}

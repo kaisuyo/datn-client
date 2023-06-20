@@ -11,7 +11,7 @@ const VerticalListStyled = styled.div`
     padding: 4px 0;
 
     .item {
-      background: lightgray;
+      background: #f8f8f8;
       border: 1px solid rgba(0, 0, 0, 0.3);
       padding: 4px;
       border-radius: 4px;
@@ -19,7 +19,7 @@ const VerticalListStyled = styled.div`
     }
 
     .item.active {
-      background: lightgray;
+      background: #ececec;
     }
   }
 `
@@ -29,7 +29,7 @@ export default function VerticalList(props) {
   return (
     <VerticalListStyled>
       {list.map(item => (<div key={item.key} className='item-wrap'>
-        <div className={`item ${item.key === activeKey}`} onClick={() => handleChangeSelected(item.key, type)}>
+        <div className={`item ${item.key === activeKey ? 'active':''}`} onClick={() => handleChangeSelected(item.key, type)}>
           <strong>{item.title}</strong>
           <Text>{item.description}</Text>
         </div>
