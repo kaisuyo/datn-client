@@ -6,10 +6,11 @@ import API from '../../../context/config'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber } from 'antd'
+import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip } from 'antd'
 import { COURSE_STATUS, ROLE } from '../../../context/enum'
 import VerticalList from '../../common/VerticalList'
 import Youtube from 'react-youtube'
+import { DeleteOutlined, FileAddOutlined, SaveOutlined } from '@ant-design/icons'
 
 const SelfCourseStyled = styled.div`
   padding: 8px 16px;
@@ -43,12 +44,24 @@ const SelfCourseStyled = styled.div`
       flex-grow: 1;
       height: 100%;
       padding: 0 0 0 4px;
+
+      .questions {
+        width: 100%;
+        height: 510px;
+        overflow: scroll;
+        padding: 4px;
+      }
     }
   }
 
   .courses {
     padding-top: 8px;
   }
+
+  .ant-form-item-control-input-content {
+    width: min-content;
+  }
+
 `
 
 export default function SelfCourses() {
@@ -391,6 +404,123 @@ export default function SelfCourses() {
                 </Space>
               </Form>
             </Space>}
+
+            {curTest && <div>
+              <Form>
+                <Space>
+                  <Form.Item
+                    name="estimate"
+                    rules={[{ required: true, message: 'Nhập thời gian làm bài!' }]}
+                  >
+                    <InputNumber placeholder='Thời gian' />
+                  </Form.Item>
+                  <Form.Item
+                    name="title"
+                    rules={[{ required: true, message: 'Nhập tiêu đề bài kiểm tra!' }]}
+                    style={{width: '200px'}}
+                  >
+                    <Input placeholder='Tiều đề'/>
+                  </Form.Item>
+                  <Form.Item
+                    style={{width: '300px'}}
+                    name="description"
+                  >
+                    <Input.TextArea placeholder='Mô tả bài kiểm tra' />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button htmlType='submit' type='primary'><SaveOutlined /></Button>
+                  </Form.Item>
+                  <Form.Item>
+                  <Tooltip title="Thêm câu hỏi" placement='bottom'>
+                      <Button><FileAddOutlined /></Button>
+                    </Tooltip>
+                  </Form.Item>
+                  <Form.Item>
+                    <Tooltip title="Xóa bài kiểm tra này" placement='bottom'>
+                      <Button danger><DeleteOutlined /></Button>
+                    </Tooltip>
+                  </Form.Item>
+                </Space>
+              </Form>
+              <Form>
+                <div className="questions">
+                  <List 
+                    grid={{
+                      gutter: 16,
+                      xs: 1,
+                      sm: 1,
+                      md: 1,
+                      lg: 1,
+                      xl: 1,
+                      xxl: 1,
+                    }}
+                    dataSource={[1, 1]}
+                    renderItem={(item, index) => (
+                      <List.Item>
+                        <Card size='small' style={{textAlign: 'left'}} hoverable>
+                          <Form.Item
+                            name={`q_${index}`}
+                            rules={[{ required: true, message: 'Không thể để trống câu hỏi!' }]}
+                          >
+                            <Input.TextArea placeholder='Nhập câu hỏi của bạn'/>
+                          </Form.Item>
+                          <Form.Item
+                            name={`q_${index}_a`}
+                            label="Đáp án A"     
+                          >
+                            <Input />
+                          </Form.Item>
+                          <Form.Item
+                            name={`q_${index}_b`}
+                            label="Đáp án B"
+                          >
+                            <Input />
+                          </Form.Item>
+                          <Form.Item
+                            name={`q_${index}_c`}
+                            label="Đáp án C"
+                          >
+                            <Input />
+                          </Form.Item>
+                          <Form.Item
+                            name={`q_${index}_d`}
+                            label="Đáp án D"
+                          >
+                            <Input />
+                          </Form.Item>
+                          <Form.Item
+                            name={`q_${index}_answer`}
+                            label="Đáp án đúng"
+                            rules={[{ required: true, message: 'Câu hỏi phải có đáp án đúng!' }]}
+                          >
+                            <Select 
+                              options={[
+                                {
+                                  value: 'A',
+                                  label: 'A',
+                                },
+                                {
+                                  value: 'B',
+                                  label: 'B',
+                                },
+                                {
+                                  value: 'C',
+                                  label: 'C',
+                                },
+                                {
+                                  value: 'D',
+                                  label: 'D',
+                                },
+                              ]}
+                            />
+                          </Form.Item>
+                        </Card>
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              </Form>
+            </div>}
           </div>
         </div>
       </div>}
