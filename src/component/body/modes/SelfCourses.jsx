@@ -10,7 +10,8 @@ import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm
 import { COURSE_STATUS, ROLE } from '../../../context/enum'
 import VerticalList from '../../common/VerticalList'
 import Youtube from 'react-youtube'
-import { DeleteOutlined, FileAddOutlined, SaveOutlined } from '@ant-design/icons'
+import { DeleteOutlined, FileAddOutlined } from '@ant-design/icons'
+import Question from './common/Question'
 
 const SelfCourseStyled = styled.div`
   padding: 8px 16px;
@@ -47,7 +48,7 @@ const SelfCourseStyled = styled.div`
 
       .questions {
         width: 100%;
-        height: 510px;
+        height: 490px;
         overflow: scroll;
         padding: 4px;
       }
@@ -278,6 +279,74 @@ export default function SelfCourses() {
     })
   }
 
+  const [questions, setQuestions] = useState([])
+  useEffect(() => {
+    if (curTest) {
+      API.get(`/questions/list/${curTest.testId}`).then(res => {
+        if (res.data.value) {
+          setQuestions(res.data.value)
+        } else {
+          toastr.error(res.data.message)
+        }
+      })
+    }
+  }, [curTest])
+
+  const [isShowModalAddQ, setShowModalAddQ] = useState(false)
+  const [formAddQ] = Form.useForm()
+
+  const changeTestInfo = (values) => {
+    API.post('/tests/update', {testId: curTest.testId, ...values}).then(res => {
+      if (res.data.value) {
+        toastr.success("Cập nhật thông tin bài kiểm tra thành công")
+      } else {
+        toastr.error(res.data.message)
+      }
+    })
+  }
+
+  const addQuestion = (values) => {
+    API.post('/questions/add', {testId: curTest.testId, ...values}).then(res => {
+      if (res.data.value) {
+        toastr.success("Tạo câu hỏi thành công")
+        setQuestions(res.data.value)
+      } else {
+        toastr.error(res.data.message)
+      }
+    })
+  }
+
+  const deleteTest = (testId) => {
+    API.get(`/tests/delete/${testId}`).then(res => {
+      if (res.data.value) {
+        toastr.success("Xóa bài kiểm tra thành công")
+      } else {
+        toastr.error(res.data.message)
+      }
+    })
+  }
+
+  const saveQuestion = (values) => {
+    API.post('/questions/update', {questionId: curTest.testId, ...values}).then(res => {
+      if (res.data.value) {
+        toastr.success("Lưu câu hỏi thành công")
+      } else {
+        toastr.error(res.data.message)
+      }
+    })
+  }
+
+  const deleteQuestion = (questionId) => {
+    API.get(`/questions/delete/${questionId}`).then(res => {
+      if (res.data.value) {
+        toastr.success("Xóa câu hỏi thành công")
+        setQuestions(res.data.value)
+      } else {
+        toastr.error(res.data.message)
+      }
+    })
+  }
+
   return (
     <SelfCourseStyled>
       {!selectedId && <Space>
@@ -406,13 +475,20 @@ export default function SelfCourses() {
             </Space>}
 
             {curTest && <div>
-              <Form>
+              <Form
+                onFinish={changeTestInfo}
+                initialValues={{
+                  estimate: curTest.estimate,
+                  title: curTest.title,
+                  description: curTest.description
+                }}
+              >
                 <Space>
                   <Form.Item
                     name="estimate"
                     rules={[{ required: true, message: 'Nhập thời gian làm bài!' }]}
                   >
-                    <InputNumber placeholder='Thời gian' />
+                    <InputNumber min={5} placeholder='Thời gian' />
                   </Form.Item>
                   <Form.Item
                     name="title"
@@ -428,98 +504,45 @@ export default function SelfCourses() {
                     <Input.TextArea placeholder='Mô tả bài kiểm tra' />
                   </Form.Item>
                   <Form.Item>
-                    <Button htmlType='submit' type='primary'><SaveOutlined /></Button>
+                    <Button htmlType='submit' type='primary'>Lưu thông tin</Button>
                   </Form.Item>
                   <Form.Item>
-                  <Tooltip title="Thêm câu hỏi" placement='bottom'>
-                      <Button><FileAddOutlined /></Button>
+                    <Tooltip title="Thêm câu hỏi" placement='bottom'>
+                      <Button onClick={() => setShowModalAddQ(true)}><FileAddOutlined /></Button>
                     </Tooltip>
                   </Form.Item>
                   <Form.Item>
-                    <Tooltip title="Xóa bài kiểm tra này" placement='bottom'>
-                      <Button danger><DeleteOutlined /></Button>
-                    </Tooltip>
+                    <Popconfirm
+                      title={'Xóa bài kiểm tra'}
+                      onConfirm={deleteTest}
+                      okText="Xóa"
+                      cancelText="Không xóa"
+                      description="Bạn thực sự muốn xóa bài kiểm tra này ?"
+                    >
+                      <Tooltip title="Xóa bài kiểm tra này" placement='bottom'>
+                        <Button danger><DeleteOutlined /></Button>
+                      </Tooltip>
+                    </Popconfirm>
                   </Form.Item>
                 </Space>
               </Form>
-              <Form>
-                <div className="questions">
-                  <List 
-                    grid={{
-                      gutter: 16,
-                      xs: 1,
-                      sm: 1,
-                      md: 1,
-                      lg: 1,
-                      xl: 1,
-                      xxl: 1,
-                    }}
-                    dataSource={[1, 1]}
-                    renderItem={(item, index) => (
-                      <List.Item>
-                        <Card size='small' style={{textAlign: 'left'}} hoverable>
-                          <Form.Item
-                            name={`q_${index}`}
-                            rules={[{ required: true, message: 'Không thể để trống câu hỏi!' }]}
-                          >
-                            <Input.TextArea placeholder='Nhập câu hỏi của bạn'/>
-                          </Form.Item>
-                          <Form.Item
-                            name={`q_${index}_a`}
-                            label="Đáp án A"     
-                          >
-                            <Input />
-                          </Form.Item>
-                          <Form.Item
-                            name={`q_${index}_b`}
-                            label="Đáp án B"
-                          >
-                            <Input />
-                          </Form.Item>
-                          <Form.Item
-                            name={`q_${index}_c`}
-                            label="Đáp án C"
-                          >
-                            <Input />
-                          </Form.Item>
-                          <Form.Item
-                            name={`q_${index}_d`}
-                            label="Đáp án D"
-                          >
-                            <Input />
-                          </Form.Item>
-                          <Form.Item
-                            name={`q_${index}_answer`}
-                            label="Đáp án đúng"
-                            rules={[{ required: true, message: 'Câu hỏi phải có đáp án đúng!' }]}
-                          >
-                            <Select 
-                              options={[
-                                {
-                                  value: 'A',
-                                  label: 'A',
-                                },
-                                {
-                                  value: 'B',
-                                  label: 'B',
-                                },
-                                {
-                                  value: 'C',
-                                  label: 'C',
-                                },
-                                {
-                                  value: 'D',
-                                  label: 'D',
-                                },
-                              ]}
-                            />
-                          </Form.Item>
-                        </Card>
-                      </List.Item>
-                    )}
-                  />
-                </div>
-              </Form>
+              <div className="questions">
+                <List 
+                  grid={{
+                    gutter: 16,
+                    xs: 1,
+                    sm: 1,
+                    md: 1,
+                    lg: 1,
+                    xl: 1,
+                    xxl: 1,
+                  }}
+                  dataSource={questions}
+                  renderItem={(item) => (
+                    <Question params={item} saveQuestion={saveQuestion} deleteQuestion={deleteQuestion} />
+                  )}
+                />
+              </div>
             </div>}
           </div>
         </div>
@@ -651,6 +674,79 @@ export default function SelfCourses() {
             name="time"
           >
             <InputNumber />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={isShowModalAddQ}
+        onCancel={() => setShowModalAddQ(false)}
+        title="Thêm câu hỏi cho bài kiểm tra"
+        onOk={() => {formAddQ.submit()}}
+      >
+        <Form
+          form={formAddQ}
+          onFinish={(values) => {
+            setShowModalAddQ(false)
+            addQuestion(values)
+          }}
+        >
+          <Form.Item
+            rules={[{ required: true, message: 'Bạn chưa nhập câu hỏi!' }]}
+            label="Câu hỏi"
+            name="description"
+          >
+            <Input.TextArea placeholder='Nhập câu hỏi'/>
+          </Form.Item>
+          <Form.Item
+            label="Đáp án A"
+            name="optionA"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Đáp án B"
+            name="optionB"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Đáp án C"
+            name="optionC"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Đáp án D"
+            name="optionD"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name={`answer`}
+            label="Đáp án đúng"
+            rules={[{ required: true, message: 'Câu hỏi phải có đáp án đúng!' }]}
+          >
+            <Select 
+              options={[
+                {
+                  value: 'A',
+                  label: 'A',
+                },
+                {
+                  value: 'B',
+                  label: 'B',
+                },
+                {
+                  value: 'C',
+                  label: 'C',
+                },
+                {
+                  value: 'D',
+                  label: 'D',
+                },
+              ]}
+            />
           </Form.Item>
         </Form>
       </Modal>
