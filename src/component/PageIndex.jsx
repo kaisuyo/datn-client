@@ -10,8 +10,8 @@ import API from '../context/config'
 import SubjectsPage from './body/modes/SubjectsPage'
 import AdminsPage from './body/modes/AdminsPage'
 import CourseSourcePage from './body/modes/CourseSourcePage'
-import CoursesPage from './body/modes/CoursesPage'
-import SelfCourses from './body/modes/SelfCourses'
+import SelfCourses from './body/modes/SelfCoursesPage/SelfCourses'
+import CoursesPage from './body/modes/CoursesPage/CoursesPage'
 
 export default function PageIndex() {
   const [curFunc, setCurFunc] = useState(0)
@@ -34,9 +34,9 @@ export default function PageIndex() {
       tab: (<CoursesPage />)
     },
     {
-      key: FUNC.SELF_COURSES, 
+      key: FUNC.SELF_COURSES,
       name: "Của bạn",
-      isShow: () => (user && [ROLE.USER, ROLE.SUPER_USER].includes(user.role)),
+      isShow: () => (user && [ROLE.USER, ROLE.SUPER_USER, ROLE.ADMIN].includes(user.role)),
       tab: (<SelfCourses />)
     },
     {
@@ -54,13 +54,13 @@ export default function PageIndex() {
     {
       key: FUNC.COURSE_SOURCE, 
       name: "Nhà cung cấp", 
-      isShow: () => (user && [ROLE.SYSTEM_USER, ROLE.ADMIN].includes(user.role)),
+      isShow: () => (user && [ROLE.SYSTEM_USER].includes(user.role)),
       tab: (<CourseSourcePage />)
     },
     {
       key: FUNC.SUGGEST, 
       name: "Gợi ý khóa học",
-      isShow: () => (user && [ROLE.ADMIN, ROLE.SYSTEM_USER].includes(user.role))
+      isShow: () => (user && [ROLE.SYSTEM_USER].includes(user.role))
     }
   ]
 

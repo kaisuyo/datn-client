@@ -1,17 +1,18 @@
 import React from 'react'
 import { useEffect } from 'react'
 import { useContext } from 'react'
-import { UserContext } from '../../../context/AppContext'
-import API from '../../../context/config'
+import { UserContext } from '../../../../context/AppContext'
+import API from '../../../../context/config'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip } from 'antd'
-import { COURSE_STATUS, ROLE } from '../../../context/enum'
-import VerticalList from '../../common/VerticalList'
+import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col } from 'antd'
+import { COURSE_STATUS, ROLE } from '../../../../context/enum'
+import VerticalList from '../../../common/VerticalList'
 import Youtube from 'react-youtube'
 import { DeleteOutlined, FileAddOutlined } from '@ant-design/icons'
-import Question from './common/Question'
+import Question from '../common/Question'
+import Course from '../common/Course'
 
 const SelfCourseStyled = styled.div`
   padding: 8px 16px;
@@ -36,18 +37,15 @@ const SelfCourseStyled = styled.div`
     }
 
     .left {
-      width: 420px;
       height: 100%;
       padding: 0 4px 0 0;
     }
     
     .right {
-      flex-grow: 1;
       height: 100%;
       padding: 0 0 0 4px;
 
       .questions {
-        width: 100%;
         height: 490px;
         overflow: scroll;
         padding: 4px;
@@ -65,7 +63,7 @@ const SelfCourseStyled = styled.div`
 
 `
 
-export default function SelfCourses() {
+export default function SelfCoursesSource() {
   const { user } = useContext(UserContext)
 
   const [selectedId, setSelectId] = useState(null)
@@ -78,8 +76,26 @@ export default function SelfCourses() {
   const [courses, setCourses] = useState([])
   const [subjects, setSubjects] = useState([])
 
+  const [isOpenModal, setOpenModal] = useState(false)
+  const [curVideo, setCurVideo] = useState(null)
+  const [curTest, setCurTest] = useState(null)
+  const [activeKey, setActiveKey] = useState(null)
+
+  const [isShowModalT, setShowModalT] = useState(false)
+  const [isShowModalV, setShowModalV] = useState(false)
+  
+  const [questions, setQuestions] = useState([])
+  const [isShowModalAddQ, setShowModalAddQ] = useState(false)
+
+  const resetStates = () => {
+    setActiveKey(null)
+    setCurVideo(null)
+    setCurTest(null)
+    setSelectId(null)
+  }
+
   useEffect(() => {
-    API.post("/courses/self", {regisType: user.role === ROLE.USER ? 0:1}).then(res => {
+    API.post("/courses/self", {regisType: user.role === ROLE.USER ? 0:(user.role === ROLE.SUPER_USER? 1: 2)}).then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
       } else {
@@ -168,11 +184,6 @@ export default function SelfCourses() {
     form.submit()
   };
 
-  const [isOpenModal, setOpenModal] = useState(false)
-  const [curVideo, setCurVideo] = useState(null)
-  const [curTest, setCurTest] = useState(null)
-
-  const [activeKey, setActiveKey] = useState(null)
   const handleChangeSelected = (key, type) => {
     setActiveKey(key)
     if (type === 'video') {
@@ -212,16 +223,16 @@ export default function SelfCourses() {
     })
   }
 
-  const [isShowModalT, setShowModalT] = useState(false)
-  const [isShowModalV, setShowModalV] = useState(false)
   const [formT] = Form.useForm()
   const [formV] = Form.useForm()
 
   const handleCreateVideo = (values) => {
     API.post('/videos/create', {...values, courseId: selectedId}).then(res => {
       if (res.data.value) {
-        setVideos([...videos, res.data.value])
-        setActiveKey(res.data.videoId)
+        const newVideo = {...res.data.value, key: res.data.value.videoId}
+        setVideos([newVideo, ...videos])
+        setCurVideo(newVideo)
+        setActiveKey(res.data.value.videoId)
         toastr.success("Tạo bài giảng thành công")
       } else {
         toastr.error(res.data.message)
@@ -234,7 +245,9 @@ export default function SelfCourses() {
   const handleCreateTest = (values) => {
     API.post('/tests/create', {...values, courseId: selectedId}).then(res => {
       if (res.data.value) {
-        setTests([...tests, res.data.value])
+        const newTest = {...res.data.value, key: res.data.value.testId}
+        setCurTest(newTest)
+        setTests([newTest, ...tests])
         setActiveKey(res.data.testId)
         toastr.success("Tạo bài kiểm tra thành công")
       } else {
@@ -272,6 +285,7 @@ export default function SelfCourses() {
       if (res.data.value) {
         setVideos(videos.filter(v => v.videoId !== curVideo.videoId))
         setCurVideo(null)
+        setCurTest(null)
         setActiveKey(null)
       } else {
         toastr.error(res.data.message)
@@ -279,7 +293,6 @@ export default function SelfCourses() {
     })
   }
 
-  const [questions, setQuestions] = useState([])
   useEffect(() => {
     if (curTest) {
       API.get(`/questions/list/${curTest.testId}`).then(res => {
@@ -292,7 +305,6 @@ export default function SelfCourses() {
     }
   }, [curTest])
 
-  const [isShowModalAddQ, setShowModalAddQ] = useState(false)
   const [formAddQ] = Form.useForm()
 
   const changeTestInfo = (values) => {
@@ -319,6 +331,10 @@ export default function SelfCourses() {
   const deleteTest = (testId) => {
     API.get(`/tests/delete/${testId}`).then(res => {
       if (res.data.value) {
+        setTests(tests.filter(t => t.testId != testId))
+        setCurVideo(null)
+        setCurTest(null)
+        setActiveKey(null)
         toastr.success("Xóa bài kiểm tra thành công")
       } else {
         toastr.error(res.data.message)
@@ -349,12 +365,12 @@ export default function SelfCourses() {
 
   return (
     <SelfCourseStyled>
-      {!selectedId && <Space>
+      {!selectedId && user.role === ROLE.SUPER_USER && <Space>
         <Button type="primary" onClick={() => setOpenModal(true)}>Tạo khóa học</Button>
       </Space>}
 
-      {selectedId && <div className='edit-space'>
-        <div className="left">
+      {selectedId && <Row className='edit-space'>
+        <Col span={7} className='left'>
           <div className="content">
             {user.role === ROLE.SUPER_USER && <div style={{padding: '4px'}}>
               <Form
@@ -365,6 +381,7 @@ export default function SelfCourses() {
                   title,
                   description
                 }}
+                disabled={selectedStatus !== COURSE_STATUS.N0}
               >
                 <Form.Item
                   name="title"
@@ -416,7 +433,13 @@ export default function SelfCourses() {
                   </Space>
                 </Form.Item>
               </Form>
-              <Tabs defaultActiveKey="1" items={[
+              <Tabs 
+                onChange={() => {
+                  setActiveKey(null);
+                  setCurTest(null);
+                  setCurVideo(null);
+                }} defaultActiveKey="1" 
+                items={[
                 {
                   key: "1", 
                   label: "Bài giảng", 
@@ -440,13 +463,14 @@ export default function SelfCourses() {
               ]} />
             </div>}
           </div>
-        </div>
-        <div className="right">
+        </Col>
+        <Col  span={17} className='right'>
           <div className="content">
             {curVideo && <Space direction='vertical'>
               <Youtube videoId={curVideo.URL} />
               <Form
                 onFinish={changeVideoInfo}
+                disabled={selectedStatus !== COURSE_STATUS.N0}
               >
                 <Space>
                   <Form.Item
@@ -482,6 +506,7 @@ export default function SelfCourses() {
                   title: curTest.title,
                   description: curTest.description
                 }}
+                disabled={selectedStatus !== COURSE_STATUS.N0}
               >
                 <Space>
                   <Form.Item
@@ -514,7 +539,7 @@ export default function SelfCourses() {
                   <Form.Item>
                     <Popconfirm
                       title={'Xóa bài kiểm tra'}
-                      onConfirm={deleteTest}
+                      onConfirm={() => deleteTest(curTest.testId)}
                       okText="Xóa"
                       cancelText="Không xóa"
                       description="Bạn thực sự muốn xóa bài kiểm tra này ?"
@@ -539,14 +564,14 @@ export default function SelfCourses() {
                   }}
                   dataSource={questions}
                   renderItem={(item) => (
-                    <Question params={item} saveQuestion={saveQuestion} deleteQuestion={deleteQuestion} />
+                    <Question params={item} status={selectedStatus} saveQuestion={saveQuestion} deleteQuestion={deleteQuestion} />
                   )}
                 />
               </div>
             </div>}
           </div>
-        </div>
-      </div>}
+        </Col>
+      </Row>}
       <div className="courses">
         <List
           grid={{
@@ -561,22 +586,7 @@ export default function SelfCourses() {
           dataSource={courses}
           renderItem={(item) => (
             <List.Item onClick={() => handleSelectCourse(item)}>
-              <Badge.Ribbon 
-                text={
-                  item.status === COURSE_STATUS.WAIT ? "Chờ duyệt" :
-                  (item.status === COURSE_STATUS.BLOCK ? "Từ chối" : 
-                  (item.status === COURSE_STATUS.N0 ? "Chỉnh sửa":"Đã duyệt"))
-                } 
-                color={
-                  item.status === COURSE_STATUS.WAIT ? "magenta" :
-                  (item.status === COURSE_STATUS.BLOCK ? "red" : 
-                  (item.status === COURSE_STATUS.N0 ? "purple":"green"))
-                }
-              >
-                <Card size='small' hoverable title={item.title}>
-                  {item.description || 'Không có mô tả'}
-                </Card>
-              </Badge.Ribbon>
+              <Course item={item} />
             </List.Item>
           )}
         />
