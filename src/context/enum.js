@@ -20,7 +20,8 @@ const FUNC = {
   SUBJECTS: 2,
   ADMINS: 3,
   COURSE_SOURCE: 4,
-  SUGGEST: 5
+  SUGGEST: 5,
+  NOTIC: 6
 }
 
 const COURSE_STATUS = {

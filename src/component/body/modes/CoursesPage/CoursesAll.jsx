@@ -2,16 +2,13 @@ import React from 'react'
 import { useEffect } from 'react'
 import { useContext } from 'react'
 import { UserContext } from '../../../../context/AppContext'
-import API from '../../../../context/config'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
 import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col } from 'antd'
 import { COURSE_STATUS, ROLE } from '../../../../context/enum'
-import VerticalList from '../../../common/VerticalList'
-import Youtube from 'react-youtube'
-import { DeleteOutlined, FileAddOutlined } from '@ant-design/icons'
-import Question from '../common/Question'
+import API from '../../../../context/config'
+import { FileAddFilled, FolderAddOutlined, SettingOutlined } from '@ant-design/icons'
 
 const CoursePageStyled = styled.div`
   padding: 8px 16px;
@@ -62,35 +59,11 @@ const CoursePageStyled = styled.div`
 
 `
 
-export default function CoursesPageForAll() {
-  const { user } = useContext(UserContext)
-
+export default function CoursesAll() {
   const [courses, setCourses] = useState([])
-  const [selectedCourse, setSelectedCourse] = useState(null)
 
-  useEffect(() => {
-    let apiLink = '/courses/'
-    if (user) {
-      switch(user.role) {
-        case ROLE.USER: 
-        case ROLE.SUPER_USER: {
-          apiLink += 'public'
-          break;
-        }
-        case ROLE.ADMIN: {
-          apiLink += 'wait'
-          break
-        }
-        case ROLE.SYSTEM_USER: {
-          apiLink += 'public'
-          break;
-        }
-        default: {}
-      }
-    } else {
-      apiLink += 'public'
-    }
-    API.get(apiLink).then(res => {
+  const getAllPublishCourse = () => {
+    API.get('/courses/publish').then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
       } else {
@@ -100,18 +73,21 @@ export default function CoursesPageForAll() {
       console.error(e)
       toastr.error("Đã có lỗi hệ thống")
     })
+  }
+
+  useEffect(() => {
+    getAllPublishCourse()
   }, [])
 
-  const handleSelectCourse = (courseId) => {
+  const handleRegisCourse = (courseId) => {
     if (courseId) {
-      API.get(`/courses/get/${courseId}`).then(res => {
+      API.post(`/courses/regis`, {courseId}).then(res => {
         if (res.data.value) {
-          const info = res.data.value
-          setSelectedCourse(info)
+          toastr.success(res.data.message)
         } else {
           toastr.error(res.data.message)
         }
-        window.scrollTo(0, 0)
+        getAllPublishCourse()
       }).catch(e => {
         console.error(e)
         toastr.error("Có lỗi trong quá trình xử lý")
@@ -121,9 +97,6 @@ export default function CoursesPageForAll() {
 
   return (
     <CoursePageStyled>
-      {selectedCourse && <Row className='info-space'>
-        
-      </Row>}
       <div className="courses">
         <List
           grid={{
@@ -137,23 +110,23 @@ export default function CoursesPageForAll() {
           }}
           dataSource={courses}
           renderItem={(item) => (
-            <List.Item onClick={() => handleSelectCourse(item.courseId)}>
-              <Badge.Ribbon 
-                text={
-                  item.status === COURSE_STATUS.WAIT ? "Chờ duyệt" :
-                  (item.status === COURSE_STATUS.BLOCK ? "Từ chối" : 
-                  (item.status === COURSE_STATUS.N0 ? "Chỉnh sửa":"Đã duyệt"))
-                } 
-                color={
-                  item.status === COURSE_STATUS.WAIT ? "magenta" :
-                  (item.status === COURSE_STATUS.BLOCK ? "red" : 
-                  (item.status === COURSE_STATUS.N0 ? "purple":"green"))
-                }
+            <List.Item>
+              <Card 
+                size='small' 
+                hoverable 
+                title={item.title}
               >
-                <Card size='small' hoverable title={item.title}>
-                  {item.description || 'Không có mô tả'}
-                </Card>
-              </Badge.Ribbon>
+                {item.description || 'Không có mô tả'}
+                <Popconfirm
+                  okText="Xác nhận"
+                  cancelText="Không"
+                  onConfirm={() => handleRegisCourse(item.courseId)}
+                  title="Đăng ký khóa học"
+                  description="Bạn sẽ đăng ký khóa học này ?"
+                >
+                  <Button block type='primary' size='small'>Đăng ký</Button>
+                </Popconfirm>
+              </Card>
             </List.Item>
           )}
         />

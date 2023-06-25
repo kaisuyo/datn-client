@@ -63,7 +63,7 @@ const SelfCourseStyled = styled.div`
 
 `
 
-export default function SelfCoursesSource() {
+export default function SelfCoursesProvider() {
   const { user } = useContext(UserContext)
 
   const [selectedId, setSelectId] = useState(null)
@@ -262,7 +262,7 @@ export default function SelfCoursesSource() {
     API.post('/courses/send', {courseId: selectedId}).then(res => {
       if (res.data.value) {
         setSelectedStatus(COURSE_STATUS.WAIT)
-        toastr.success("Tạo bài kiểm tra thành công")
+        toastr.success("Đã gửi khóa học tới danh sách chờ kiểm duyệt")
       } else {
         toastr.error(res.data.message)
       }
@@ -361,6 +361,10 @@ export default function SelfCoursesSource() {
         toastr.error(res.data.message)
       }
     })
+  }
+
+  const handleVideoReady = (event) => {
+    API.post('/videos/updateTime', {videoId: curVideo.videoId, time: event.target.getDuration()/60})
   }
 
   return (
@@ -467,7 +471,10 @@ export default function SelfCoursesSource() {
         <Col  span={17} className='right'>
           <div className="content">
             {curVideo && <Space direction='vertical'>
-              <Youtube videoId={curVideo.URL} />
+              <Youtube 
+                videoId={curVideo.URL} 
+                onReady={handleVideoReady}  
+              />
               <Form
                 onFinish={changeVideoInfo}
                 disabled={selectedStatus !== COURSE_STATUS.N0}
@@ -678,12 +685,6 @@ export default function SelfCoursesSource() {
             rules={[{ required: true, message: 'Hãy nhập id của video (Youtube)' }]}
           >
             <Input />
-          </Form.Item>
-          <Form.Item
-            label="Thời lượng"
-            name="time"
-          >
-            <InputNumber />
           </Form.Item>
         </Form>
       </Modal>

@@ -12,6 +12,7 @@ import AdminsPage from './body/modes/AdminsPage'
 import CourseSourcePage from './body/modes/CourseSourcePage'
 import SelfCourses from './body/modes/SelfCoursesPage/SelfCourses'
 import CoursesPage from './body/modes/CoursesPage/CoursesPage'
+import Require from './body/modes/Require'
 
 export default function PageIndex() {
   const [curFunc, setCurFunc] = useState(0)
@@ -38,6 +39,12 @@ export default function PageIndex() {
       name: "Của bạn",
       isShow: () => (user && [ROLE.USER, ROLE.SUPER_USER, ROLE.ADMIN].includes(user.role)),
       tab: (<SelfCourses />)
+    },
+    {
+      key: FUNC.NOTIC,
+      name: "Yêu cầu",
+      isShow: () => (user && user.role === ROLE.SUPER_USER),
+      tab: (<Require />)
     },
     {
       key: FUNC.SUBJECTS, 

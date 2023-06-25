@@ -21,7 +21,7 @@ export default function Course({item}) {
     <Badge.Ribbon 
       text={
         item.status === COURSE_STATUS.WAIT ? "Chờ duyệt" :
-        (item.status === COURSE_STATUS.BLOCK ? "Từ chối" : 
+        (item.status === COURSE_STATUS.BLOCK ? "Bảo trì" : 
         (item.status === COURSE_STATUS.N0 ? "Chỉnh sửa":"Đã duyệt"))
       }
       color={

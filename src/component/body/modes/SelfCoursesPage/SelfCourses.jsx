@@ -3,7 +3,7 @@ import { useContext } from 'react'
 import { UserContext } from '../../../../context/AppContext'
 import { ROLE } from '../../../../context/enum'
 import SelfCoursesApprover from './SelfCoursesApprover'
-import SelfCoursesSource from './SelfCoursesSource'
+import SelfCoursesProvider from './SelfCoursesProvider'
 import SelfCoursesUser from './SelfCoursesUser'
 
 export default function SelfCourses() {
@@ -11,7 +11,8 @@ export default function SelfCourses() {
   return (
     <>{
       (user && user.role === ROLE.ADMIN) ? <SelfCoursesApprover /> :
-      (user && user.role === ROLE.SUPER_USER ? <SelfCoursesSource /> : <SelfCoursesUser />)  
+      (user && user.role === ROLE.SUPER_USER ? <SelfCoursesProvider /> : 
+      (user && user.role === ROLE.USER ?<SelfCoursesUser />:<></>))
     }</>
   )
 }
