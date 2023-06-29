@@ -87,6 +87,9 @@ export default function SelfCoursesProvider() {
   const [questions, setQuestions] = useState([])
   const [isShowModalAddQ, setShowModalAddQ] = useState(false)
 
+  const [formT] = Form.useForm()
+  const [formV] = Form.useForm()
+
   const resetStates = () => {
     setActiveKey(null)
     setCurVideo(null)
@@ -135,6 +138,9 @@ export default function SelfCoursesProvider() {
       }).catch(e => {
         console.error(e)
         toastr.error("Có lỗi trong quá trình xử lý")
+      }).finally(() => {
+        setCurTest(null)
+        setCurVideo(null)
       })
     }
 
@@ -163,6 +169,8 @@ export default function SelfCoursesProvider() {
       console.error(e)
       toastr.error("Đã có lỗi hệ thống")
     })
+
+
   }
 
   const handleUpdateCourse = (values) => {
@@ -222,9 +230,6 @@ export default function SelfCoursesProvider() {
       toastr.error("Đã có lỗi hệ thống")
     })
   }
-
-  const [formT] = Form.useForm()
-  const [formV] = Form.useForm()
 
   const handleCreateVideo = (values) => {
     API.post('/videos/create', {...values, courseId: selectedId}).then(res => {
@@ -299,10 +304,15 @@ export default function SelfCoursesProvider() {
         if (res.data.value) {
           setQuestions(res.data.value)
         } else {
+          setQuestions([])
           toastr.error(res.data.message)
         }
+      }).finally(() => {
+        formAddQ.resetFields()
+        formT.resetFields()
       })
     }
+
   }, [curTest])
 
   const [formAddQ] = Form.useForm()
@@ -385,7 +395,6 @@ export default function SelfCoursesProvider() {
                   title,
                   description
                 }}
-                disabled={selectedStatus !== COURSE_STATUS.N0}
               >
                 <Form.Item
                   name="title"
@@ -431,7 +440,7 @@ export default function SelfCoursesProvider() {
                       cancelText="Không"
                       okText="Xóa"
                     >
-                      <Button danger size="small">Xóa khóa học</Button>
+                      <Button disabled={selectedStatus !== COURSE_STATUS.N0} danger size="small">Xóa khóa học</Button>
                     </Popconfirm>
                     <Button onClick={() => setSelectId(null)}>Đóng</Button>
                   </Space>

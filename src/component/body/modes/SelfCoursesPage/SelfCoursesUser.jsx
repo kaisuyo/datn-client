@@ -81,6 +81,8 @@ export default function SelfCoursesUser() {
 
   const [isStartTest, setStartTest] = useState(false)
 
+  const [maxScore, setMaxScore] = useState(0);
+
   const getSelfCourses = () => {
     API.post("/courses/self", {regisType: 0}).then(res => {
       if (res.data.value) {
@@ -144,6 +146,14 @@ export default function SelfCoursesUser() {
           toastr.error(res.data.message)
         }
       })
+
+      API.get(`tests/tested/maxScore/${curTest.testId}`).then(res => {
+        if (res.data.value) {
+          setMaxScore(res.data.value.score)
+        } else {
+          setMaxScore(0)
+        }
+      })
     }
   }, [curTest])
 
@@ -177,11 +187,24 @@ export default function SelfCoursesUser() {
 
   const countDownRef = useRef()
   const submit = (values) => {
-    // const params = {
-    //   testId: curTest.testId,
-    //   time: 
-    // }
     console.log(countDownRef.current)
+    // prepare answers
+    const answers = Object.keys(values).map(v => ({
+      questionId: v,
+      answer: values[v]
+    }))
+    const testId = curTest.testId
+
+    API.post('/tests/submit', { answers, testId }).then(res => {
+      if (res.data.value) {
+        toastr.success(`Bạn đã hoàn thành bài test với ${res.data.value.score/10} điểm`)
+      } else {
+        toastr.error('Có lỗi trong quá trình xủ lý')
+      }
+    })
+    testingForm.resetFields();
+    setCurTest(null)
+    setActiveKey(null)
     setStartTest(false)
   }
 
@@ -237,9 +260,10 @@ export default function SelfCoursesUser() {
             {curTest && <div>
               <div className="questions">
                 <Space>
-                  {!isStartTest && <Button type='primary' onClick={() => setStartTest(true)}>Bắt đầu</Button>}
+                  {!isStartTest && <Button type='primary' onClick={() => setStartTest(true)}>Bắt đầu làm bài</Button>}
                   {isStartTest && <Countdown ref={countDownRef} date={curTest.estimate*60*1000 + Date.now()} onComplete={handleSubmit} />}
                   {isStartTest && <Button type='primary' onClick={handleSubmit}>Nộp bài</Button>}
+                  <Typography.Text><mark>Điểm cao nhất: {maxScore || 'Chưa có dữ liệu'}</mark></Typography.Text>
                 </Space>
                 {isStartTest && <Form
                   onFinish={submit}

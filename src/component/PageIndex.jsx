@@ -13,6 +13,7 @@ import CourseSourcePage from './body/modes/CourseSourcePage'
 import SelfCourses from './body/modes/SelfCoursesPage/SelfCourses'
 import CoursesPage from './body/modes/CoursesPage/CoursesPage'
 import Require from './body/modes/Require'
+import SuggestPage from './body/modes/SuggestPage'
 
 export default function PageIndex() {
   const [curFunc, setCurFunc] = useState(0)
@@ -67,7 +68,8 @@ export default function PageIndex() {
     {
       key: FUNC.SUGGEST, 
       name: "Gợi ý khóa học",
-      isShow: () => (user && [ROLE.SYSTEM_USER].includes(user.role))
+      isShow: () => (user && [ROLE.SYSTEM_USER].includes(user.role)),
+      tab: (<SuggestPage />)
     }
   ]
 
