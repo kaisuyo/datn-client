@@ -90,15 +90,8 @@ export default function SelfCoursesProvider() {
   const [formT] = Form.useForm()
   const [formV] = Form.useForm()
 
-  const resetStates = () => {
-    setActiveKey(null)
-    setCurVideo(null)
-    setCurTest(null)
-    setSelectId(null)
-  }
-
   useEffect(() => {
-    API.post("/courses/self", {regisType: user.role === ROLE.USER ? 0:(user.role === ROLE.SUPER_USER? 1: 2)}).then(res => {
+    API.post("/provide/courses/self").then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
       } else {
@@ -109,7 +102,7 @@ export default function SelfCoursesProvider() {
       toastr.error("Đã có lỗi hệ thống")
     })
 
-    API.get('subjects/all').then(res => {
+    API.post('/common/subjects').then(res => {
       if (res.data.value) {
         setSubjects(res.data.value.map(s => ({label: s.title, value: s.subjectId})))
       }
@@ -123,7 +116,7 @@ export default function SelfCoursesProvider() {
 
   useEffect(() => {
     if (selectedId) {
-      API.get(`/courses/get/${selectedId}`).then(res => {
+      API.post(`provide/courses/get`, {courseId: selectedId}).then(res => {
         if (res.data.value) {
           const { title, description, status, videos, tests } = res.data.value
           setTitle(title)
@@ -144,7 +137,7 @@ export default function SelfCoursesProvider() {
       })
     }
 
-    API.post("/courses/self", {regisType: user.role === ROLE.USER ? 0:1}).then(res => {
+    API.post("provide/courses/self").then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
       } else {
@@ -158,7 +151,7 @@ export default function SelfCoursesProvider() {
   }, [title, description])
 
   const handleCreateCourse = (values) => {
-    API.post("/courses/create", values).then(res => {
+    API.post("provide/courses/create", values).then(res => {
       if (res.data.value) {
         setSelectId(res.data.value.courseId)
         setOpenModal(false)
@@ -174,7 +167,7 @@ export default function SelfCoursesProvider() {
   }
 
   const handleUpdateCourse = (values) => {
-    API.post("/courses/update", {...values, courseId: selectedId}).then(res => {
+    API.post("provide/courses/update", {...values, courseId: selectedId}).then(res => {
       if (res.data.value) {
         setSelectId(res.data.value)
         toastr.success(res.data.message)
@@ -195,14 +188,14 @@ export default function SelfCoursesProvider() {
   const handleChangeSelected = (key, type) => {
     setActiveKey(key)
     if (type === 'video') {
-      API.get(`videos/${key}`).then(res => {
+      API.post(`provide/videos/get`, {videoId: key}).then(res => {
         setCurVideo(res.data.value)
       }).catch(e => {
         console.error(e)
         toastr.error("Có lỗi trong quá trình xử lý")
       })
     } else if (type === 'test') {
-      API.get(`tests/${key}`).then(res => {
+      API.post(`provide/tests/get`, {testId: key}).then(res => {
         setCurTest(res.data.value)
       }).catch(e => {
         console.error(e)
@@ -212,7 +205,7 @@ export default function SelfCoursesProvider() {
   }
 
   const handleDeleteCourse = () => {
-    API.get(`/courses/delete/${selectedId}`).then(res => {
+    API.post(`provide/courses/delete`, {courseId: selectedId}).then(res => {
       if (res.data.value) {
         setTests([])
         setVideos([])
@@ -232,7 +225,7 @@ export default function SelfCoursesProvider() {
   }
 
   const handleCreateVideo = (values) => {
-    API.post('/videos/create', {...values, courseId: selectedId}).then(res => {
+    API.post('provide/videos/create', {...values, courseId: selectedId}).then(res => {
       if (res.data.value) {
         const newVideo = {...res.data.value, key: res.data.value.videoId}
         setVideos([newVideo, ...videos])
@@ -248,7 +241,7 @@ export default function SelfCoursesProvider() {
   }
 
   const handleCreateTest = (values) => {
-    API.post('/tests/create', {...values, courseId: selectedId}).then(res => {
+    API.post('provide/tests/create', {...values, courseId: selectedId}).then(res => {
       if (res.data.value) {
         const newTest = {...res.data.value, key: res.data.value.testId}
         setCurTest(newTest)
@@ -264,7 +257,7 @@ export default function SelfCoursesProvider() {
   }
 
   const sendCourse = () => {
-    API.post('/courses/send', {courseId: selectedId}).then(res => {
+    API.post('provide/courses/send', {courseId: selectedId}).then(res => {
       if (res.data.value) {
         setSelectedStatus(COURSE_STATUS.WAIT)
         toastr.success("Đã gửi khóa học tới danh sách chờ kiểm duyệt")
@@ -275,7 +268,7 @@ export default function SelfCoursesProvider() {
   }
 
   const changeVideoInfo = (values) => {
-    API.post(`/videos/update`, {...values, videoId: curVideo.videoId}).then(res => {
+    API.post(`provide/videos/update`, {...values, videoId: curVideo.videoId}).then(res => {
       if (res.data.value) {
         setCurVideo({...curVideo, URL: values.url})
 
@@ -286,7 +279,7 @@ export default function SelfCoursesProvider() {
   }
 
   const deleteVideo = () => {
-    API.get(`/videos/delete/${curVideo.videoId}`).then(res => {
+    API.post(`provide/videos/delete`, {videoId: curVideo.videoId}).then(res => {
       if (res.data.value) {
         setVideos(videos.filter(v => v.videoId !== curVideo.videoId))
         setCurVideo(null)
@@ -300,7 +293,7 @@ export default function SelfCoursesProvider() {
 
   useEffect(() => {
     if (curTest) {
-      API.get(`/questions/list/${curTest.testId}`).then(res => {
+      API.post(`provide/questions/list`, {testId: curTest.testId}).then(res => {
         if (res.data.value) {
           setQuestions(res.data.value)
         } else {
@@ -318,7 +311,7 @@ export default function SelfCoursesProvider() {
   const [formAddQ] = Form.useForm()
 
   const changeTestInfo = (values) => {
-    API.post('/tests/update', {testId: curTest.testId, ...values}).then(res => {
+    API.post('provide/tests/update', {testId: curTest.testId, ...values}).then(res => {
       if (res.data.value) {
         toastr.success("Cập nhật thông tin bài kiểm tra thành công")
       } else {
@@ -328,7 +321,7 @@ export default function SelfCoursesProvider() {
   }
 
   const addQuestion = (values) => {
-    API.post('/questions/add', {testId: curTest.testId, ...values}).then(res => {
+    API.post('provide/questions/add', {testId: curTest.testId, ...values}).then(res => {
       if (res.data.value) {
         toastr.success("Tạo câu hỏi thành công")
         setQuestions(res.data.value)
@@ -339,9 +332,9 @@ export default function SelfCoursesProvider() {
   }
 
   const deleteTest = (testId) => {
-    API.get(`/tests/delete/${testId}`).then(res => {
+    API.post(`provide/tests/delete`, {testId}).then(res => {
       if (res.data.value) {
-        setTests(tests.filter(t => t.testId != testId))
+        setTests(tests.filter(t => t.testId !== testId))
         setCurVideo(null)
         setCurTest(null)
         setActiveKey(null)
@@ -353,7 +346,7 @@ export default function SelfCoursesProvider() {
   }
 
   const saveQuestion = (values) => {
-    API.post('/questions/update', {questionId: curTest.testId, ...values}).then(res => {
+    API.post('provide/questions/update', {questionId: curTest.testId, ...values}).then(res => {
       if (res.data.value) {
         toastr.success("Lưu câu hỏi thành công")
       } else {
@@ -363,7 +356,7 @@ export default function SelfCoursesProvider() {
   }
 
   const deleteQuestion = (questionId) => {
-    API.get(`/questions/delete/${questionId}`).then(res => {
+    API.post(`provide/questions/delete`, {questionId}).then(res => {
       if (res.data.value) {
         toastr.success("Xóa câu hỏi thành công")
         setQuestions(res.data.value)
@@ -374,19 +367,19 @@ export default function SelfCoursesProvider() {
   }
 
   const handleVideoReady = (event) => {
-    API.post('/videos/updateTime', {videoId: curVideo.videoId, time: event.target.getDuration()/60})
+    API.post('provide/videos/updateTime', {videoId: curVideo.videoId, time: event.target.getDuration()/60})
   }
 
   return (
     <SelfCourseStyled>
-      {!selectedId && user.role === ROLE.SUPER_USER && <Space>
+      {!selectedId && user.role === ROLE.PROVIDER && <Space>
         <Button type="primary" onClick={() => setOpenModal(true)}>Tạo khóa học</Button>
       </Space>}
 
       {selectedId && <Row className='edit-space'>
         <Col span={7} className='left'>
           <div className="content">
-            {user.role === ROLE.SUPER_USER && <div style={{padding: '4px'}}>
+            {user.role === ROLE.PROVIDER && <div style={{padding: '4px'}}>
               <Form
                 size='small'
                 onFinish={handleUpdateCourse}

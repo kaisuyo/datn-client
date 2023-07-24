@@ -84,7 +84,7 @@ export default function SelfCoursesUser() {
   const [maxScore, setMaxScore] = useState(0);
 
   const getSelfCourses = () => {
-    API.post("/courses/self", {regisType: 0}).then(res => {
+    API.post("/learn/self").then(res => {
       if (res.data.value) {
         console.log(res);
         setCourses(res.data.value)
@@ -102,7 +102,7 @@ export default function SelfCoursesUser() {
   }, [])
 
   const handleSelectCourse = (course) => {
-    API.get(`/courses/get/${course.courseId}`).then(res => {
+    API.post(`/learn/get`, {courseId: course.courseId}).then(res => {
       if (res.data.value) {
         const data = res.data.value
         const tests = data.tests.map(t => ({...t, key: t.testId}))
@@ -121,14 +121,14 @@ export default function SelfCoursesUser() {
   const handleChangeSelected = (key, type) => {
     setActiveKey(key)
     if (type === 'video') {
-      API.get(`videos/${key}`).then(res => {
+      API.post(`learn/videos`, {videoId: key}).then(res => {
         setCurVideo(res.data.value)
       }).catch(e => {
         console.error(e)
         toastr.error("Có lỗi trong quá trình xử lý")
       })
     } else if (type === 'test') {
-      API.get(`tests/${key}`).then(res => {
+      API.post(`learn/tests`, {testId: key}).then(res => {
         setCurTest(res.data.value)
       }).catch(e => {
         console.error(e)
@@ -139,7 +139,7 @@ export default function SelfCoursesUser() {
 
   useEffect(() => {
     if (curTest) {
-      API.get(`/questions/list/${curTest.testId}`).then(res => {
+      API.post(`learn/questions`, {testId: curTest.testId}).then(res => {
         if (res.data.value) {
           setQuestions(res.data.value)
         } else {
@@ -147,7 +147,7 @@ export default function SelfCoursesUser() {
         }
       })
 
-      API.get(`tests/tested/maxScore/${curTest.testId}`).then(res => {
+      API.post(`learn/maxScore`, {testId: curTest.testId}).then(res => {
         if (res.data.value) {
           setMaxScore(res.data.value.score)
         } else {
@@ -166,16 +166,16 @@ export default function SelfCoursesUser() {
 
   const handlePause = (event) => {
     let end = event.target.getCurrentTime()
-    let seenTime = (end - start)/60
-    API.post('/videos/seen', {videoId: curVideo.videoId, seenTime}).then(res => {
+    let watchTime = (end - start)/60
+    API.post('learn/videos/watch', {videoId: curVideo.videoId, watchTime}).then(res => {
       start = 0
     })
   }
 
   const handleEnd = (event) => {
     let end = event.target.getCurrentTime()
-    let seenTime = (end - start)/60
-    API.post('/videos/seen', {videoId: curVideo.videoId, seenTime}).then(res => {
+    let watchTime = (end - start)/60
+    API.post('learn/videos/watch', {videoId: curVideo.videoId, watchTime}).then(res => {
       start = 0
     })
   }
@@ -187,7 +187,6 @@ export default function SelfCoursesUser() {
 
   const countDownRef = useRef()
   const submit = (values) => {
-    console.log(countDownRef.current)
     // prepare answers
     const answers = Object.keys(values).map(v => ({
       questionId: v,
@@ -195,7 +194,7 @@ export default function SelfCoursesUser() {
     }))
     const testId = curTest.testId
 
-    API.post('/tests/submit', { answers, testId }).then(res => {
+    API.post('learn/tests/submit', { answers, testId, time: 10, rate: 3 }).then(res => {
       if (res.data.value) {
         toastr.success(`Bạn đã hoàn thành bài test với ${res.data.value.score/10} điểm`)
       } else {

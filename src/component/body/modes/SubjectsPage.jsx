@@ -41,11 +41,11 @@ const SubjectPage = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    API.get('/subjects/all').then(res => {
+    API.post('/system/subjects/').then(res => {
       if (res.data.value) {
         setSubjects(res.data.value)
       } else {
-        toastr.error('Có lỗi trong quá trình xử lý')
+        toastr.error(res.data.message)
       }
     }).catch(e => {
       console.error(e)
@@ -56,7 +56,7 @@ const SubjectPage = () => {
   // Xử lý submit form thêm môn học
   const handleAddSubject = (values) => {
     
-    API.post('/subjects/create', values).then(res => {
+    API.post('system/subjects/create', values).then(res => {
       if (res.data.value) {
         const subject = res.data.value
         setSubjects([...subjects, subject]);
@@ -84,7 +84,7 @@ const SubjectPage = () => {
 
   // Xử lý submit form sửa thông tin môn học
   const handleEditSubject = (values) => {
-    API.post('/subjects/edit', {...values, subjectId: editingSubject}).then(res => {
+    API.post('system/subjects/edit', {...values, subjectId: editingSubject}).then(res => {
       if (res.data.value) {
         const updatedSubjects = subjects.map(s =>
           s.subjectId === editingSubject ? {...values, subjectId: editingSubject} : s
@@ -105,7 +105,7 @@ const SubjectPage = () => {
 
 
   const handleDeleteSubject = (id) => {
-    API.post('/subjects/delete', {subjectId: id}).then(res => {
+    API.post('system/subjects/delete', {subjectId: id}).then(res => {
       if (res.data.value) {
         setSubjects(subjects.filter((subject) => subject.subjectId !== id));
       } else {

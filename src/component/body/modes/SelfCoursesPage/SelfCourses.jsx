@@ -10,9 +10,9 @@ export default function SelfCourses() {
   const { user } = useContext(UserContext)
   return (
     <>{
-      (user && user.role === ROLE.ADMIN) ? <SelfCoursesApprover /> :
-      (user && user.role === ROLE.SUPER_USER ? <SelfCoursesProvider /> : 
-      (user && user.role === ROLE.USER ?<SelfCoursesUser />:<></>))
+      (user && user.role === ROLE.APPROVER) ? <SelfCoursesApprover /> :
+      (user && user.role === ROLE.PROVIDER ? <SelfCoursesProvider /> : 
+      (user && user.role === ROLE.LEARNER ?<SelfCoursesUser />:<></>))
     }</>
   )
 }

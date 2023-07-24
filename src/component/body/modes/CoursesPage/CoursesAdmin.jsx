@@ -5,10 +5,8 @@ import { UserContext } from '../../../../context/AppContext'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col } from 'antd'
-import { COURSE_STATUS, ROLE } from '../../../../context/enum'
+import { Button, Card, List, Popconfirm } from 'antd'
 import API from '../../../../context/config'
-import { FileAddFilled, FolderAddOutlined, SettingOutlined } from '@ant-design/icons'
 
 const CoursePageStyled = styled.div`
   padding: 8px 16px;
@@ -65,7 +63,7 @@ export default function CoursesAdmin() {
   const [courses, setCourses] = useState([])
 
   const getAllWaitCourse = () => {
-    API.get('/courses/wait').then(res => {
+    API.post('approve/wait').then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
       } else {
@@ -85,7 +83,7 @@ export default function CoursesAdmin() {
 
   const handleAddForApprove = (courseId) => {
     if (courseId) {
-      API.get(`/courses/wait/add/${courseId}`).then(res => {
+      API.post(`approve/add`, {courseId}).then(res => {
         if (res.data.value) {
           toastr.success(res.data.message)
         } else {

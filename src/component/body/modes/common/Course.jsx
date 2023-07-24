@@ -9,11 +9,12 @@ import { COURSE_STATUS } from '../../../../context/enum'
 export default function Course({item}) {
   const { courseId } = item
   const [another, setAnother] = useState("Đang cập nhật")
+  const [subject, setSubject] = useState("Đang cập nhật")
   useEffect(() => {
-    console.log(item);
-    API.get(`/courses/another/${courseId}`).then(res => {
+    API.post(`common/courses/subInfo`, {courseId}).then(res => {
       if (res.data.value) {
-        setAnother(res.data.value.user.username)
+        setAnother(res.data.value.another)
+        setSubject(res.data.value.subject)
       }
     })
   }, [])
@@ -30,12 +31,15 @@ export default function Course({item}) {
         (item.status === COURSE_STATUS.N0 ? "purple":"green"))
       }
     >
+      <div title={item.title}>
       <Card size='small' hoverable title={item.title}>
         <Space direction='vertical'>
           <Typography.Text>{item.description || 'Không có mô tả'}</Typography.Text>
+          <Typography.Text type="secondary">Môn học: {subject}</Typography.Text>
           <Typography.Text type="secondary">Người đăng: {another}</Typography.Text>
         </Space>
       </Card>
+      </div>
     </Badge.Ribbon>
   )
 }

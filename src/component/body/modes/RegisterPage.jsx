@@ -34,7 +34,7 @@ const RegisterPage = () => {
 
   const services = {
     signUp: (signUpData) => {
-      API.post('/users/signUp', signUpData).then(res => {
+      API.post('/auth/signUp', signUpData).then(res => {
         if (res.data.value) {
           setUser(res.data.value)
         } else {

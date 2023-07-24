@@ -78,7 +78,7 @@ export default function SelfCoursesApprover() {
   const [questions, setQuestions] = useState([])
 
   const getSelfCourses = () => {
-    API.post("/courses/self", {regisType: user.role === ROLE.USER ? 0:(user.role === ROLE.SUPER_USER? 1: 2)}).then(res => {
+    API.post("/approve/self").then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
       } else {
@@ -95,33 +95,33 @@ export default function SelfCoursesApprover() {
   }, [])
 
   const handleSelectCourse = (course) => {
-      API.get(`/courses/get/${course.courseId}`).then(res => {
-        if (res.data.value) {
-          const data = res.data.value
-          const tests = data.tests.map(t => ({...t, key: t.testId}))
-          const videos = data.videos.map(v => ({...v, key: v.videoId}))
-          setSelectCourse({...data, ...{videos}, ...{tests}})
-        } else {
-          toastr.error(res.data.message)
-        }
-        window.scrollTo(0, 0)
-      }).catch(e => {
-        console.error(e)
-        toastr.error("Có lỗi trong quá trình xử lý")
-      })
+    API.post(`approve/get`, {courseId: course.courseId}).then(res => {
+      if (res.data.value) {
+        const data = res.data.value
+        const tests = data.tests.map(t => ({...t, key: t.testId}))
+        const videos = data.videos.map(v => ({...v, key: v.videoId}))
+        setSelectCourse({...data, ...{videos}, ...{tests}})
+      } else {
+        toastr.error(res.data.message)
+      }
+      window.scrollTo(0, 0)
+    }).catch(e => {
+      console.error(e)
+      toastr.error("Có lỗi trong quá trình xử lý")
+    })
   }
 
   const handleChangeSelected = (key, type) => {
     setActiveKey(key)
     if (type === 'video') {
-      API.get(`videos/${key}`).then(res => {
+      API.post(`approve/videos`, {videoId: key}).then(res => {
         setCurVideo(res.data.value)
       }).catch(e => {
         console.error(e)
         toastr.error("Có lỗi trong quá trình xử lý")
       })
     } else if (type === 'test') {
-      API.get(`tests/${key}`).then(res => {
+      API.post(`approve/tests`, {testId: key}).then(res => {
         setCurTest(res.data.value)
       }).catch(e => {
         console.error(e)
@@ -131,7 +131,7 @@ export default function SelfCoursesApprover() {
   }
 
   const handleApprove = (values) => {
-    API.post('/courses/approve', {...values, courseId: selectedCourse.courseId}).then(res => {
+    API.post('/approve/', {...values, courseId: selectedCourse.courseId}).then(res => {
       if (res.data.value) {
         toastr.success("Cập nhật thành công trạng thái khóa học")
         setSelectCourse(null)
@@ -147,7 +147,7 @@ export default function SelfCoursesApprover() {
 
   useEffect(() => {
     if (curTest) {
-      API.get(`/questions/list/${curTest.testId}`).then(res => {
+      API.post(`approve/questions`, {testId: curTest.testId}).then(res => {
         if (res.data.value) {
           setQuestions(res.data.value)
         } else {

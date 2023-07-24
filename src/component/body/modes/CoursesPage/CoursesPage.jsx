@@ -9,7 +9,7 @@ export default function CoursesPage() {
   const { user } = useContext(UserContext)
   return (
     <>
-      {user && user.role === ROLE.ADMIN ? <CoursesAdmin />:<CoursesAll />}
+      {user && user.role === ROLE.APPROVER ? <CoursesAdmin />:<CoursesAll />}
     </>
   )
 }

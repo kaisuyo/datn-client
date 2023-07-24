@@ -5,10 +5,9 @@ import { UserContext } from '../../../../context/AppContext'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col } from 'antd'
+import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col, Typography } from 'antd'
 import { COURSE_STATUS, ROLE } from '../../../../context/enum'
 import API from '../../../../context/config'
-import { FileAddFilled, FolderAddOutlined, SettingOutlined } from '@ant-design/icons'
 
 const CoursePageStyled = styled.div`
   padding: 8px 16px;
@@ -61,9 +60,22 @@ const CoursePageStyled = styled.div`
 
 export default function CoursesAll() {
   const [courses, setCourses] = useState([])
+  const [suggests, setSuggests] = useState([])
+
+  const { user } = useContext(UserContext)
+
+  useEffect(() => {
+    if (user) {
+      API.post("learn/suggest").then(res => {
+        if (res.data.value) {
+          setSuggests(res.data.value)
+        }
+      })
+    }
+  }, [])
 
   const getAllPublishCourse = () => {
-    API.get('/courses/publish').then(res => {
+    API.post('common/courses').then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
       } else {
@@ -81,7 +93,7 @@ export default function CoursesAll() {
 
   const handleRegisCourse = (courseId) => {
     if (courseId) {
-      API.post(`/courses/regis`, {courseId}).then(res => {
+      API.post(`learn/courses/regis`, {courseId}).then(res => {
         if (res.data.value) {
           toastr.success(res.data.message)
         } else {
@@ -97,7 +109,45 @@ export default function CoursesAll() {
 
   return (
     <CoursePageStyled>
+      {suggests.length > 0 && <div className='suggest'>
+        <Typography.Title level={3}>Gợi ý</Typography.Title>
+        <List
+          grid={{
+            gutter: 16,
+            xs: 1,
+            sm: 2,
+            md: 4,
+            lg: 4,
+            xl: 6,
+            xxl: 3,
+          }}
+          dataSource={suggests}
+          renderItem={(item) => (
+            <List.Item title={item.title}>
+              <Card 
+                size='small' 
+                hoverable 
+                title={item.title}
+              >
+                {item.description || 'Không có mô tả'}
+                <br />
+                <Typography.Text type="secondary">Môn học: {item.subject.title}</Typography.Text>
+                <Popconfirm
+                  okText="Xác nhận"
+                  cancelText="Không"
+                  onConfirm={() => handleRegisCourse(item.courseId)}
+                  title="Đăng ký khóa học"
+                  description="Bạn sẽ đăng ký khóa học này ?"
+                >
+                  <Button block type='primary' size='small'>Đăng ký</Button>
+                </Popconfirm>
+              </Card>
+            </List.Item>
+          )}
+        />
+      </div>}
       <div className="courses">
+      <Typography.Title level={3}>Tất cả</Typography.Title>
         <List
           grid={{
             gutter: 16,
@@ -117,6 +167,8 @@ export default function CoursesAll() {
                 title={item.title}
               >
                 {item.description || 'Không có mô tả'}
+                <br />
+                <Typography.Text type="secondary">Môn học: {item.subject.title}</Typography.Text>
                 <Popconfirm
                   okText="Xác nhận"
                   cancelText="Không"

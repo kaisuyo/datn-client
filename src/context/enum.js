@@ -5,10 +5,10 @@ const ACTION = {
 }
 
 const ROLE = {
-  USER: 0,
-  SUPER_USER: 1,
-  ADMIN: 2,
-  SYSTEM_USER: 3,
+  LEARNER: 0,
+  PROVIDER: 1,
+  APPROVER: 2,
+  SYSTEM: 3,
 }
 
 const FUNC = {

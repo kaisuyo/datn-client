@@ -50,7 +50,7 @@ const CourseSourcePage = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    API.get(`/users/${ROLE.SUPER_USER}`).then(res => {
+    API.post(`/system/users/`, {roleType: ROLE.PROVIDER}).then(res => {
       if (res.data.value) {
         setCourseSources(res.data.value)
       } else {
@@ -64,7 +64,7 @@ const CourseSourcePage = () => {
 
   // Xử lý submit form thêm admin
   const handleAddCourseSource = (values) => {
-    API.post(`/users/create`, {...values, roleType: ROLE.SUPER_USER}).then(res => {
+    API.post(`system/users/create`, {...values, roleType: ROLE.PROVIDER}).then(res => {
       if (res.data.value) {
         const courseSource = res.data.value
         setCourseSources([...courseSources, courseSource]);
@@ -81,7 +81,7 @@ const CourseSourcePage = () => {
   };
 
   const handleDeleteCourseSource = (id) => {
-    API.post('/users/delete', {userId: id}).then(res => {
+    API.post('system/users/delete', {userId: id}).then(res => {
       if (res.data.value) {
         setCourseSources(courseSources.filter((cs) => cs.userId !== id));
       } else {
@@ -94,7 +94,7 @@ const CourseSourcePage = () => {
   };
 
   const handleResetPass = (id) => {
-    API.post('/users/resetPass', {userId: id}).then(res => {
+    API.post('system/users/resetPass', {userId: id}).then(res => {
       toastr.success(res.data.message)
     }).catch(e => {
       console.error(e)
@@ -103,7 +103,7 @@ const CourseSourcePage = () => {
   };
 
   const handleBlock = (id) => {
-    API.post('/users/block', {userId: id}).then(res => {
+    API.post('system/users/block', {userId: id}).then(res => {
       if (res.data.value) {
         const updatedAdmins = courseSources.map(cs =>
           cs.userId === id ? {...cs, userId: id, status: 0} : cs
@@ -121,7 +121,7 @@ const CourseSourcePage = () => {
   };
 
   const handleUnblock = (id) => {
-    API.post('/users/unblock', {userId: id}).then(res => {
+    API.post('system/users/unblock', {userId: id}).then(res => {
       if (res.data.value) {
         const updatedAdmins = courseSources.map(cs =>
           cs.userId === id ? {...cs, userId: id, status: 1} : cs

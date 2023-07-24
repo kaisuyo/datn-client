@@ -52,7 +52,7 @@ export default function Header(props) {
   const { user, setUser } = useContext(UserContext)
 
   const logout = () => {
-    API.get('/users/logout').then(res => {
+    API.get('/auth/logout').then(res => {
       setUser(null)
     }).catch(e => {
       setUser(null)
@@ -62,7 +62,7 @@ export default function Header(props) {
   const [changePassModal, setChangePassModal] = useState(false)
   const [form] = Form.useForm()
   const handleChangePass = (values) => {
-    API.post('/users/changePass', values).then(res => {
+    API.post('/auth/changePass', values).then(res => {
       if (res.data.value) {
         toastr.success(res.data.message)
       } else {

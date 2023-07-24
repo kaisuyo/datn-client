@@ -22,7 +22,7 @@ export default function Require() {
   const [requires, setRequires] = useState([]);
 
   const getAllRequires = () => {
-    API.get('/courses/requires').then(res => {
+    API.post('provide/requires').then(res => {
       if (res.data.value) {
         setRequires(res.data.value)
       } else {
@@ -39,7 +39,7 @@ export default function Require() {
   }, [])
 
   const handleBlock = (id) => {
-    API.post('/courses/blockRegis', {waitId: id}).then(res => {
+    API.post('requires/blockRegis', {waitId: id}).then(res => {
       if (res.data.value) {
         getAllRequires()
         toastr.success("Xử lý yêu cầu thành công")
@@ -53,7 +53,7 @@ export default function Require() {
   };
 
   const handleAlow = (id) => {
-    API.post('/courses/alowRegis', {waitId: id}).then(res => {
+    API.post('requires/alowRegis', {waitId: id}).then(res => {
       if (res.data.value) {
         getAllRequires()
         toastr.success("Xử lý yêu cầu thành công")

@@ -50,7 +50,7 @@ const AdminsPage = () => {
   const [form] = Form.useForm();
 
   useEffect(() => {
-    API.get(`/users/${ROLE.ADMIN}`).then(res => {
+    API.post(`system/users`, {roleType: ROLE.APPROVER}).then(res => {
       if (res.data.value) {
         setAdmins(res.data.value)
       } else {
@@ -64,7 +64,7 @@ const AdminsPage = () => {
 
   // Xử lý submit form thêm admin
   const handleAddAdmin = (values) => {
-    API.post(`/users/create`, {...values, roleType: ROLE.ADMIN}).then(res => {
+    API.post(`system/users/create`, {...values, roleType: ROLE.APPROVER}).then(res => {
       if (res.data.value) {
         const admin = res.data.value
         setAdmins([...admins, admin]);
@@ -81,7 +81,7 @@ const AdminsPage = () => {
   };
 
   const handleDeleteAdmin = (id) => {
-    API.post('/users/delete', {userId: id}).then(res => {
+    API.post('system/users/delete', {userId: id}).then(res => {
       if (res.data.value) {
         setAdmins(admins.filter((ad) => ad.subjectId !== id));
       } else {
@@ -94,7 +94,7 @@ const AdminsPage = () => {
   };
 
   const handleResetPass = (id) => {
-    API.post('/users/resetPass', {userId: id}).then(res => {
+    API.post('system/users/resetPass', {userId: id}).then(res => {
       toastr.success(res.data.message)
     }).catch(e => {
       console.error(e)
@@ -103,7 +103,7 @@ const AdminsPage = () => {
   };
 
   const handleBlock = (id) => {
-    API.post('/users/block', {userId: id}).then(res => {
+    API.post('system/users/block', {userId: id}).then(res => {
       if (res.data.value) {
         const updatedAdmins = admins.map(ad =>
           ad.userId === id ? {...ad, userId: id, status: 0} : ad
@@ -121,7 +121,7 @@ const AdminsPage = () => {
   };
 
   const handleUnblock = (id) => {
-    API.post('/users/unblock', {userId: id}).then(res => {
+    API.post('system/users/unblock', {userId: id}).then(res => {
       if (res.data.value) {
         const updatedAdmins = admins.map(ad =>
           ad.userId === id ? {...ad, userId: id, status: 1} : ad

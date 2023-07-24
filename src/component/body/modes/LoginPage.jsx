@@ -34,7 +34,7 @@ const LoginPage = () => {
   const { setUser } = useContext(UserContext)
   const services = {
     login: (loginData) => {
-      API.post('/users/login', loginData).then(res => {
+      API.post('/auth/login', loginData).then(res => {
         if (res.data.value) {
           setUser(res.data.value)
         } else {

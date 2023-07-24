@@ -84,7 +84,7 @@ export default function SuggestPage() {
       }
     })
 
-    API.get('/subjects/all').then(res => {
+    API.post('common/subjects').then(res => {
       if (res.data.value) {
         setSubjects(res.data.value)
       }

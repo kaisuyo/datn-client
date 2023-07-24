@@ -38,43 +38,43 @@ export default function PageIndex() {
     {
       key: FUNC.SELF_COURSES,
       name: "Của bạn",
-      isShow: () => (user && [ROLE.USER, ROLE.SUPER_USER, ROLE.ADMIN].includes(user.role)),
+      isShow: () => (user && [ROLE.LEARNER, ROLE.PROVIDER, ROLE.APPROVER].includes(user.role)),
       tab: (<SelfCourses />)
     },
     {
       key: FUNC.NOTIC,
       name: "Yêu cầu",
-      isShow: () => (user && user.role === ROLE.SUPER_USER),
+      isShow: () => (user && user.role === ROLE.PROVIDER),
       tab: (<Require />)
     },
     {
       key: FUNC.SUBJECTS, 
       name: "Môn học",
-      isShow: () => (user && user.role === ROLE.SYSTEM_USER),
+      isShow: () => (user && user.role === ROLE.SYSTEM),
       tab: (<SubjectsPage />)
     },
     {
       key: FUNC.ADMINS, 
       name: "Người phụ trách", 
-      isShow: () => (user && user.role === ROLE.SYSTEM_USER),
+      isShow: () => (user && user.role === ROLE.SYSTEM),
       tab: (<AdminsPage />)
     },
     {
       key: FUNC.COURSE_SOURCE, 
       name: "Nhà cung cấp", 
-      isShow: () => (user && [ROLE.SYSTEM_USER].includes(user.role)),
+      isShow: () => (user && [ROLE.SYSTEM].includes(user.role)),
       tab: (<CourseSourcePage />)
     },
     {
       key: FUNC.SUGGEST, 
       name: "Gợi ý khóa học",
-      isShow: () => (user && [ROLE.SYSTEM_USER].includes(user.role)),
+      isShow: () => (user && [ROLE.SYSTEM].includes(user.role)),
       tab: (<SuggestPage />)
     }
   ]
 
   useEffect(() => {
-    API.get('/users/').then(res => {
+    API.post('/auth/').then(res => {
       if (res.data.value) {
         setUser(res.data.value)
       }
