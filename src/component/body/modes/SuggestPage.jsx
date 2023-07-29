@@ -434,7 +434,7 @@ export default function SuggestPage() {
                 key: 'total'}
             ]}
           />
-          {/* <Form
+          <Form
             form={configForm}
             onFinish={configFormSubmit}
             initialValues={{
@@ -442,7 +442,7 @@ export default function SuggestPage() {
               epsilon: 0.0001
             }}
           >
-          </Form> */}
+          </Form>
         </Space>
       </Modal>
 
