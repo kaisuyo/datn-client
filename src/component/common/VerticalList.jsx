@@ -31,6 +31,7 @@ export default function VerticalList(props) {
       {list.map(item => (<div key={item.key} className='item-wrap'>
         <div className={`item ${item.key === activeKey ? 'active':''}`} onClick={() => handleChangeSelected(item.key, type)}>
           <strong>{item.title}</strong>
+          <br />
           <Text>{item.description}</Text>
         </div>
       </div>))}

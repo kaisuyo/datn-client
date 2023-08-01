@@ -344,6 +344,13 @@ export default function SuggestPage() {
           dataSource={phase2Data}
           columns={[
             {
+              title: 'ID',
+              width: 80,
+              dataIndex: 'userId',
+              key: 'userId',
+              fixed: 'left' 
+            },
+            {
               title: 'Người học',
               width: 180,
               dataIndex: 'username',
@@ -362,20 +369,6 @@ export default function SuggestPage() {
                 <div style={{textAlign: 'left'}}>{text}</div>
               )
             }))),
-            // {
-            //   title: 'Nhóm',
-            //   width: 150,
-            //   dataIndex: 'cluster',
-            //   key: 'cluster',
-            //   fixed: 'right',
-            //   render: (text, record) => (<Select 
-            //     size="small"
-            //     onChange={(value) => handleChangeLabelPhase2(record, value)}
-            //     style={{width: '100%'}}
-            //     options={items.map(i => ({label: i.name, value: i.id}))}
-            //     value={record.cluster}
-            //   />)
-            // },
             {
               title: 'Gợi ý',
               key: 'suggest',
@@ -445,97 +438,6 @@ export default function SuggestPage() {
           </Form>
         </Space>
       </Modal>
-
-      {/* <Modal
-        open={openSuggestModal}
-        onCancel={() => {setOpenSuggestModal(false); setPhase2Data([]); setSuggestStep(0)}}
-        width={1000}
-        bodyStyle={{minHeight: 200}}
-        title={suggestStep === 1 ? "Bảng quy đổi giá trị mức độ quan tâm môn học" : "Tạo nhóm"}
-        centered
-        okText={suggestStep === 1 ? "Phân nhóm" : "Tiếp tục"}
-        cancelText="Thoát"
-        onOk={() => {
-          suggestStep === 0 && handleClusterPhase2Step1(); 
-          suggestStep === 1 && handleClusterPhase2Step2(); 
-        }}
-      >
-        {suggestStep === 0 && <div>
-          <div>
-            <div>
-              <Space>
-                <Input
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  placeholder="Enter item name"
-                />
-                <Button type="primary" disabled={!newItemName || items.filter(i => i.name === newItemName).length > 0} onClick={handleAddItem}>
-                  Add Item
-                </Button>
-                <Button danger type='primary' onClick={clearItems}>
-                  Clear
-                </Button>
-              </Space>
-            </div>
-            <List
-              dataSource={items}
-              renderItem={(item) => (
-                <Item
-                  item={item}
-                  onUpdate={handleUpdateItem}
-                  onDelete={handleDeleteItem}
-                />
-              )}
-            />
-          </div>
-        </div>}
-        {suggestStep === 1 && <div>
-          <Table 
-            bordered
-            size='small'
-            pagination={{
-              pageSize: 6,
-            }} 
-            dataSource={phase2Data}
-            columns={[
-              {
-                title: 'Người học',
-                width: 180,
-                dataIndex: 'username',
-                key: 'username',
-                fixed: 'left',
-                render: (text, record) => (<Tooltip title={record.userId}>
-                  {text}
-                </Tooltip>) 
-              },
-              ...(subjects.map(e => ({
-                title: e.title,
-                dataIndex: `${e.subjectId}`,
-                key: `${e.subjectId}`,
-                width: 150,
-                render: (text, record) => (
-                  <div style={{textAlign: 'left'}}>{text}</div>
-                )
-              }))),
-              {
-                title: 'Nhóm',
-                width: 150,
-                dataIndex: 'cluster',
-                key: 'cluster',
-                fixed: 'right',
-                render: (text, record) => (<Select 
-                  size="small"
-                  onChange={(value) => handleChangeLabelPhase2(record, value)}
-                  style={{width: '100%'}}
-                  options={items.map(i => ({label: i.name, value: i.id}))}
-                  value={record.cluster}
-                />)
-              }
-            ]}
-            scroll={{ x: 'max-content' }}
-          />
-        </div>}
-      </Modal> */}
 
       <Modal
         open={!!showModal}

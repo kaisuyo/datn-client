@@ -6,7 +6,7 @@ import API from '../../../../context/config'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col, Typography, Statistic } from 'antd'
+import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col, Typography, Statistic, Rate } from 'antd'
 import { COURSE_STATUS, ROLE } from '../../../../context/enum'
 import VerticalList from '../../../common/VerticalList'
 import Youtube from 'react-youtube'
@@ -149,7 +149,7 @@ export default function SelfCoursesUser() {
 
       API.post(`learn/maxScore`, {testId: curTest.testId}).then(res => {
         if (res.data.value) {
-          setMaxScore(res.data.value.score)
+          setMaxScore(res.data.value)
         } else {
           setMaxScore(0)
         }
@@ -185,6 +185,7 @@ export default function SelfCoursesUser() {
     testingForm.submit()
   }
 
+  const [showTestRateForm, setShowTestRate] = useState(null)
   const countDownRef = useRef()
   const submit = (values) => {
     // prepare answers
@@ -194,18 +195,38 @@ export default function SelfCoursesUser() {
     }))
     const testId = curTest.testId
 
-    API.post('learn/tests/submit', { answers, testId, time: 10, rate: 3 }).then(res => {
+    API.post('learn/tests/submit', { answers, testId, time: (curTest.estimate*60-countDownRef.current.state.timeDelta.total/1000)/60 }).then(res => {
       if (res.data.value) {
-        toastr.success(`Bạn đã hoàn thành bài test với ${res.data.value.score/10} điểm`)
+        toastr.success(`Bạn đã hoàn thành bài test với ${(res.data.value/10).toFixed(2)} điểm`)
       } else {
         toastr.error('Có lỗi trong quá trình xủ lý')
       }
+
+      let testId = curTest.testId
+      setTimeout(() => {
+        setShowTestRate(testId)
+      }, 3000)
+
+      testingForm.resetFields();
+      setCurTest(null)
+      setActiveKey(null)
+      setStartTest(false)
     })
-    testingForm.resetFields();
-    setCurTest(null)
-    setActiveKey(null)
-    setStartTest(false)
   }
+
+  const rattingVideo = (rate) => {
+    API.post("/learn/rateVideo", {videoId: curVideo.videoId, rate})
+  }
+
+  const rattingTest = (testId, rate) => {
+    API.post("/learn/rateTest", {testId, rate})
+  }
+
+  useEffect(() => {
+    if (isStartTest) {
+      countDownRef.current.start()
+    }
+  }, [isStartTest])
 
   return (
     <SelfCourseStyled>
@@ -254,15 +275,16 @@ export default function SelfCoursesUser() {
                 onEnd={handleEnd}
                 ref={videoRef}
               />
+              Đánh giá: <Rate allowHalf defaultValue={curVideo.rate} onChange={rattingVideo} />
             </Space>}
 
             {curTest && <div>
               <div className="questions">
                 <Space>
                   {!isStartTest && <Button type='primary' onClick={() => setStartTest(true)}>Bắt đầu làm bài</Button>}
-                  {isStartTest && <Countdown ref={countDownRef} date={curTest.estimate*60*1000 + Date.now()} onComplete={handleSubmit} />}
+                  {<Countdown autoStart={false} ref={countDownRef} date={curTest.estimate*60*1000 + Date.now()} onComplete={handleSubmit} />}
                   {isStartTest && <Button type='primary' onClick={handleSubmit}>Nộp bài</Button>}
-                  <Typography.Text><mark>Điểm cao nhất: {maxScore || 'Chưa có dữ liệu'}</mark></Typography.Text>
+                  <Typography.Text><mark>Điểm trung bình của bạn: {maxScore.toFixed(2) || 'Chưa có dữ liệu'}</mark></Typography.Text>
                 </Space>
                 {isStartTest && <Form
                   onFinish={submit}
@@ -308,6 +330,13 @@ export default function SelfCoursesUser() {
           )}
         />
       </div>
+
+      <Modal
+        open={showTestRateForm}
+        title="Đánh giá bài kiểm tra"
+      >
+        <Rate allowHalf defaultValue={0} onChange={(rate) => {rattingTest(showTestRateForm, rate); setShowTestRate(null)}} />
+      </Modal>
     </SelfCourseStyled>
   )
 }
