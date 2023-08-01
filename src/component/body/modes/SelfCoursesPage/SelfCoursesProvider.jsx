@@ -359,7 +359,7 @@ export default function SelfCoursesProvider() {
     API.post(`provide/questions/delete`, {questionId}).then(res => {
       if (res.data.value) {
         toastr.success("Xóa câu hỏi thành công")
-        setQuestions(res.data.value)
+        setQuestions(questions.filter(q => q.questionId !== questionId))
       } else {
         toastr.error(res.data.message)
       }
@@ -481,7 +481,6 @@ export default function SelfCoursesProvider() {
                 onFinish={changeVideoInfo}
                 disabled={selectedStatus !== COURSE_STATUS.N0}
               >
-                <Space>
                   <Form.Item
                     label="Thay đổi URL video"
                     name="url"
@@ -503,7 +502,6 @@ export default function SelfCoursesProvider() {
                       <Button danger>Xóa bài giảng</Button>
                     </Popconfirm>
                   </Form.Item>
-                </Space>
               </Form>
             </Space>}
 
@@ -522,7 +520,7 @@ export default function SelfCoursesProvider() {
                     name="estimate"
                     rules={[{ required: true, message: 'Nhập thời gian làm bài!' }]}
                   >
-                    <InputNumber min={5} placeholder='Thời gian' />
+                    <InputNumber style={{width: '100px'}} addonAfter="Phút" min={5} placeholder='Thời gian' />
                   </Form.Item>
                   <Form.Item
                     name="title"

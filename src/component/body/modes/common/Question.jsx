@@ -39,24 +39,24 @@ export default function Question({params, deleteQuestion, saveQuestion, status})
                     <Form.Item
                       name={`optionA`}
                     >
-                      <Input placeholder='Đáp án A' />
+                      <Input addonBefore="A. " placeholder='Đáp án A' />
                     </Form.Item>
                     <Form.Item
                       name={`optionB`}
                     >
-                      <Input placeholder='Đáp án B'/>
+                      <Input addonBefore="B. " placeholder='Đáp án B'/>
                     </Form.Item>
                   </Col>
                   <Col span={12} style={{paddingLeft: 8}}>
                     <Form.Item
                       name={`optionC`}
                     >
-                      <Input placeholder='Đáp án C'/>
+                      <Input addonBefore="C. " placeholder='Đáp án C'/>
                     </Form.Item>
                     <Form.Item
                       name={`optionD`}
                     >
-                      <Input placeholder='Đáp án D'/>
+                      <Input addonBefore="D. " placeholder='Đáp án D'/>
                     </Form.Item>
                   </Col>
                 </Row>

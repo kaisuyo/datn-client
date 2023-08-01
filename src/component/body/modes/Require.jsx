@@ -39,13 +39,13 @@ export default function Require() {
   }, [])
 
   const handleBlock = (id) => {
-    API.post('requires/blockRegis', {waitId: id}).then(res => {
+    API.post('provide/requires/blockRegis', {waitId: id}).then(res => {
       if (res.data.value) {
-        getAllRequires()
         toastr.success("Xử lý yêu cầu thành công")
       } else {
         toastr.error(res.data.message)
       }
+      getAllRequires()
     }).catch(e => {
       console.error(e)
       toastr.error("Có lỗi trong quá trình xử lý")
@@ -53,13 +53,13 @@ export default function Require() {
   };
 
   const handleAlow = (id) => {
-    API.post('requires/alowRegis', {waitId: id}).then(res => {
+    API.post('provide/requires/alowRegis', {waitId: id}).then(res => {
       if (res.data.value) {
-        getAllRequires()
         toastr.success("Xử lý yêu cầu thành công")
       } else {
         toastr.error(res.data.message)
       }
+      getAllRequires()
     }).catch(e => {
       console.error(e)
       toastr.error("Có lỗi trong quá trình xử lý")
