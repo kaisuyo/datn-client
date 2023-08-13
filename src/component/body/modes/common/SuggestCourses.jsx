@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import API from '../../../../context/config';
 import toastr from 'toastr'
 import ListSuggest from './ListSuggest';
+import { useContext } from 'react';
+import { UserContext } from '../../../../context/AppContext';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -27,6 +29,8 @@ const SuggestCourses = (props) => {
   const [subjectList, setSubjectList] = useState([])
   const [allList, setAllList] = useState([]);
 
+  const { setLoading } = useContext(UserContext)
+
   const moveItemToLeft = (item) => {
     setAllList(allList.filter((i) => i.key !== item.key));
     setCustomList([...customList, item]);
@@ -38,6 +42,7 @@ const SuggestCourses = (props) => {
   };
 
   useEffect(() => {
+    setLoading(true)
     API.post('/suggest/get/', {userId: user.userId}).then(res => {
       if (res.data.value) {
         const { all, userSuggest, subjectSuggest, customSuggest } = res.data.value
@@ -46,6 +51,8 @@ const SuggestCourses = (props) => {
         setUserList(userSuggest)
         setSubjectList(subjectSuggest)
       }
+    }).finally(() => {
+      setLoading(false)
     })
   }, [user])
 
@@ -60,12 +67,15 @@ const SuggestCourses = (props) => {
   }
 
   const removeCustomSuggest = (course) => {
+    setLoading(true)
     API.post('/suggest/unAssign', {userId: user.userId, courseId: course.key}).then(res => {
       if (res.data.value) {
         moveItemToRight(course)
       } else {
         toastr.error(res.data.message)
       }
+    }).finally(() => {
+      setLoading(false)
     })
   }
 

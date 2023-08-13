@@ -141,7 +141,7 @@ export default function SelfCoursesUser() {
     if (curTest) {
       API.post(`learn/questions`, {testId: curTest.testId}).then(res => {
         if (res.data.value) {
-          setQuestions(res.data.value)
+          setQuestions(res.data.value.map(v=> v.dataValues))
         } else {
           toastr.error(res.data.message)
         }
@@ -196,7 +196,7 @@ export default function SelfCoursesUser() {
     const testId = curTest.testId
 
     API.post('learn/tests/submit', { answers, testId, time: (curTest.estimate*60-countDownRef.current.state.timeDelta.total/1000)/60 }).then(res => {
-      if (res.data.value) {
+      if (res.data.value !== undefined) {
         toastr.success(`Bạn đã hoàn thành bài test với ${(res.data.value/10).toFixed(2)} điểm`)
       } else {
         toastr.error('Có lỗi trong quá trình xủ lý')
@@ -275,15 +275,15 @@ export default function SelfCoursesUser() {
                 onEnd={handleEnd}
                 ref={videoRef}
               />
-              Đánh giá: <Rate allowHalf defaultValue={curVideo.rate} onChange={rattingVideo} />
+              Đánh giá: <Rate allowHalf value={curVideo.rate} onChange={rattingVideo} />
             </Space>}
 
             {curTest && <div>
               <div className="questions">
                 <Space>
                   {!isStartTest && <Button type='primary' onClick={() => setStartTest(true)}>Bắt đầu làm bài</Button>}
-                  {<Countdown autoStart={false} ref={countDownRef} date={curTest.estimate*60*1000 + Date.now()} onComplete={handleSubmit} />}
                   {isStartTest && <Button type='primary' onClick={handleSubmit}>Nộp bài</Button>}
+                  {<Countdown autoStart={false} ref={countDownRef} date={curTest.estimate*60*1000 + Date.now()} onComplete={handleSubmit} />}
                   <Typography.Text><mark>Điểm trung bình của bạn: {maxScore.toFixed(2) || 'Chưa có dữ liệu'}</mark></Typography.Text>
                 </Space>
                 {isStartTest && <Form
@@ -334,6 +334,8 @@ export default function SelfCoursesUser() {
       <Modal
         open={showTestRateForm}
         title="Đánh giá bài kiểm tra"
+        onCancel={() => setShowTestRate(false)}
+        footer={[]}
       >
         <Rate allowHalf defaultValue={0} onChange={(rate) => {rattingTest(showTestRateForm, rate); setShowTestRate(null)}} />
       </Modal>

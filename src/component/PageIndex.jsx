@@ -14,10 +14,33 @@ import SelfCourses from './body/modes/SelfCoursesPage/SelfCourses'
 import CoursesPage from './body/modes/CoursesPage/CoursesPage'
 import Require from './body/modes/Require'
 import SuggestPage from './body/modes/SuggestPage'
+import styled from 'styled-components'
+
+import SyncLoader from 'react-spinners/SyncLoader'
+
+const override = {
+  display: "block",
+  margin: "0 auto",
+  borderColor: "red",
+  position: "absolute",
+  top: "50vh",
+  left: "50vw",
+  transform: "translate(-50%, -50%)",
+};
+
+const SpinContainer = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999999999;
+`
 
 export default function PageIndex() {
   const [curFunc, setCurFunc] = useState(0)
-  const { user, setUser } = useContext(UserContext)
+  const { user, setUser, isLoading } = useContext(UserContext)
   const funcs = [
     {
       key: FUNC.LOGIN,
@@ -89,6 +112,15 @@ export default function PageIndex() {
     <div>
       <Header curFunc={curFunc} setCurFunc={setCurFunc} funcs={funcs} />
       <Body curFunc={curFunc} setCurFunc={setCurFunc} funcs={funcs} />
+      {isLoading && 
+        <SpinContainer>
+          <SyncLoader 
+            cssOverride={override}
+            loading={isLoading}
+            color={'#4343fa'}
+          />
+        </SpinContainer>
+      }
     </div>
   )
 }

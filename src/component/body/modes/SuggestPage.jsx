@@ -1,11 +1,12 @@
-import { Button, Card, Form, Input, InputNumber, List, Modal, Popconfirm, Select, Space, Table, Tag, Tooltip } from 'antd';
+import { Button, Form, Modal, Popconfirm, Select, Space, Table, Tag, Tooltip } from 'antd';
 import React, { useState } from 'react'
 import { useEffect } from 'react';
 import styled from 'styled-components'
 import API from '../../../context/config';
 import toastr from 'toastr';
-import Item from '../../common/Item';
 import SuggestCourses from './common/SuggestCourses';
+import { useContext } from 'react';
+import { UserContext } from '../../../context/AppContext';
 
 const SuggestPageStyled = styled.div`
   padding: 16px;
@@ -19,60 +20,15 @@ const SuggestPageStyled = styled.div`
   }
 `
 
-const initialItems = [
-  {
-    label: 'Tab 1',
-    children: 'Content of Tab 1',
-    key: '1',
-  },
-  {
-    label: 'Tab 2',
-    children: 'Content of Tab 2',
-    key: '2',
-  },
-  {
-    label: 'Tab 3',
-    children: 'Content of Tab 3',
-    key: '3',
-    closable: false,
-  },
-];
-
 export default function SuggestPage() {
   const [showConfigClustering, setShowConfigClustering] = useState(false);
   const [learnResults, setLearnResult] = useState([])
   const [subjects, setSubjects] = useState([])
-  const [suggestStep, setSuggestStep] = useState(0)
 
-  const [items, setItems] = useState([]);
-  const [newItemName, setNewItemName] = useState('');
-
-  const handleAddItem = () => {
-    const newItem = {
-      id: items.length,
-      name: newItemName,
-    };
-    setItems([...items, newItem]);
-    setNewItemName('');
-  };
-
-  const clearItems = () => {
-    setItems([])
-  }
-
-  const handleUpdateItem = (itemId, newName) => {
-    const updatedItems = items.map((item) =>
-      item.id === itemId ? { ...item, name: newName } : item
-    );
-    setItems(updatedItems);
-  };
-
-  const handleDeleteItem = (itemId) => {
-    const updatedItems = items.filter((item) => item.id !== itemId);
-    setItems(updatedItems);
-  };
+  const { setLoading } = useContext(UserContext)
 
   const getAllData = () => {
+    setLoading(true)
     API.get('/suggest/all').then(res => {
       if (res.data.value) {
         setLearnResult(res.data.value.map(d => ({
@@ -82,6 +38,8 @@ export default function SuggestPage() {
           title: d.subject.title
         })))
       }
+    }).finally(() => {
+      setLoading(false)
     })
 
     API.post('common/subjects').then(res => {
@@ -96,6 +54,7 @@ export default function SuggestPage() {
   }, [])
 
   const saveRecord = (record, value) => {
+    setLoading(true)
     API.post('/suggest/update', {userId: record.userId, subjectId: record.subjectId, label: value}).then(res => {
       if (res.data.value) {
         const newList = [...learnResults]
@@ -109,17 +68,22 @@ export default function SuggestPage() {
         console.log(new Set(newList.map(l => l.label)));
         setLearnResult(newList)
       }
+    }).finally(() => {
+      setLoading(false)
     })
   }
 
 
   const calculate = () => {
-    toastr.warning("Việc tính toán của hệ thống có thể mất vài phút. Bạn có thể quay lại trang này sau.")
+    toastr.warning("Việc tính toán của hệ thống có thể mất vài phút")
     setLearnResult([])
+    setLoading(true)
     API.get('/suggest/calculate').then(res => {
       getAllData()
     }).catch(e => {
-      toastr.warning("Hệ thống mất quá nhiều thời gian phản hồi. Bạn có thể quay lại trang này sau.")
+      toastr.warning("Hệ thống mất quá nhiều thời gian phản hồi")
+    }).finally(() => {
+      setLoading(false)
     })
   }
 
@@ -127,10 +91,6 @@ export default function SuggestPage() {
   const [showModal, setShowModal] = useState(null)
   const handleShowCourse = (record) => {
     setShowModal(record)
-  }
-
-  const handleSuggestSameCourse = () => {
-
   }
 
   const columns = [
@@ -220,13 +180,16 @@ export default function SuggestPage() {
   }
 
   const configFormSubmit = (values) => {
-    toastr.warning("Quá trình phân cụm có thể mất nhiều thời gian. Bạn có thể quay trở lại trang này sau.")
+    toastr.warning("Quá trình phân cụm có thể mất nhiều thời gian.")
+    setLoading(true)
     API.post('/suggest/clustering', {values}).then(res => {
       if (res.data.value) {
         setShowConfigClustering(false)
         toastr.warning("Quá trình phân cụm đã hoàn tất")
         getAllData()
       }
+    }).finally(() => {
+      setLoading(false)
     })
   }
 
@@ -259,36 +222,6 @@ export default function SuggestPage() {
 
     setPhase2Data(tempData)
     window.scrollTo(0, document.body.scrollHeight);
-  }
-
-  const handleClusterPhase2Step1 = () => {
-    setSuggestStep(1)
-  }
-
-  const handleClusterPhase2Step2 = () => {
-    const temp = phase2Data.map(d => d.cluster)
-    if(items.every(i => temp.includes(i.id))) {
-      clusterPhase2()
-    } else {
-      toastr.error("Chưa đủ phần tử mỗi nhóm")
-    }
-  }
-
-  const handleChangeLabelPhase2 = (record, value) => {
-    const recordIndex = phase2Data.findIndex(r => r.userId === record.userId)
-    if (recordIndex !== -1) {
-      phase2Data[recordIndex].cluster = value
-    }
-
-    setPhase2Data([...phase2Data])
-  }
-
-  const clusterPhase2 = (values) => {
-    API.post('/suggest/clusteringPhase2', {dataList: phase2Data, clusters: items.map(i => i.id)}).then(res => {
-      if (res.data.value) {
-        setPhase2Data(res.data.value)
-      }
-    })
   }
 
   return (
@@ -348,7 +281,10 @@ export default function SuggestPage() {
               width: 80,
               dataIndex: 'userId',
               key: 'userId',
-              fixed: 'left' 
+              fixed: 'left',
+              filters: phase2Data.map(d => ({text: d.userId, value: d.userId})),
+              filterSearch: true,
+              onFilter: (value, record) => `${record.userId}`.startsWith(`${value}`),
             },
             {
               title: 'Người học',
@@ -394,7 +330,7 @@ export default function SuggestPage() {
         onCancel={() => setShowConfigClustering(false)}
         title="Thông tin nhãn đã được gán"
         okText="Bắt đầu phân cụm"
-        onOk={handleClustering}
+        onOk={() => {handleClustering(); setShowConfigClustering(false)}}
       >
         <Space size='large'>
           <Table 

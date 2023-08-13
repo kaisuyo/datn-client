@@ -5,9 +5,9 @@ import { UserContext } from '../../../../context/AppContext'
 import toastr from 'toastr'
 import { useState } from 'react'
 import styled from 'styled-components'
-import { Button, Select, Card, Form, List, Modal, Space, Input, Tabs, Popconfirm, Badge, InputNumber, Tooltip, Row, Col, Typography } from 'antd'
-import { COURSE_STATUS, ROLE } from '../../../../context/enum'
+import { Button, Card, List, Popconfirm, Typography } from 'antd'
 import API from '../../../../context/config'
+import { ROLE } from '../../../../context/enum'
 
 const CoursePageStyled = styled.div`
   padding: 8px 16px;
@@ -62,19 +62,11 @@ export default function CoursesAll() {
   const [courses, setCourses] = useState([])
   const [suggests, setSuggests] = useState([])
 
-  const { user } = useContext(UserContext)
+  const { user, setLoading } = useContext(UserContext)
 
-  useEffect(() => {
-    if (user) {
-      API.post("learn/suggest").then(res => {
-        if (res.data.value) {
-          setSuggests(res.data.value)
-        }
-      })
-    }
-  }, [])
 
   const getAllPublishCourse = () => {
+    setLoading(true)
     API.post('common/courses').then(res => {
       if (res.data.value) {
         setCourses(res.data.value)
@@ -84,8 +76,30 @@ export default function CoursesAll() {
     }).catch(e => {
       console.error(e)
       toastr.error("Đã có lỗi hệ thống")
+    }).finally(() => {
+      setLoading(false)
     })
   }
+
+  useEffect(() => {
+    if (user) {
+      setLoading(true)
+      API.post("learn/suggest").then(res => {
+        if (res.data.value) {
+          setSuggests(res.data.value)
+        } else {
+          setSuggests([])
+        }
+      }).catch(e => {
+        setSuggests([])
+      }).finally(() => {
+        setLoading(false)
+      })
+    } else {
+      setSuggests([])
+      getAllPublishCourse()
+    }
+  }, [user])
 
   useEffect(() => {
     getAllPublishCourse()
@@ -93,6 +107,7 @@ export default function CoursesAll() {
 
   const handleRegisCourse = (courseId) => {
     if (courseId) {
+      setLoading(true)
       API.post(`learn/courses/regis`, {courseId}).then(res => {
         if (res.data.value) {
           toastr.success(res.data.message)
@@ -103,6 +118,8 @@ export default function CoursesAll() {
       }).catch(e => {
         console.error(e)
         toastr.error("Có lỗi trong quá trình xử lý")
+      }).finally(() => {
+        setLoading(false)
       })
     }
   }
@@ -169,15 +186,16 @@ export default function CoursesAll() {
                 {item.description || 'Không có mô tả'}
                 <br />
                 <Typography.Text type="secondary">Môn học: {item.subject.title}</Typography.Text>
-                <Popconfirm
-                  okText="Xác nhận"
-                  cancelText="Không"
-                  onConfirm={() => handleRegisCourse(item.courseId)}
-                  title="Đăng ký khóa học"
-                  description="Bạn sẽ đăng ký khóa học này ?"
-                >
-                  <Button block type='primary' size='small'>Đăng ký</Button>
-                </Popconfirm>
+                {user && [ROLE.APPROVER, ROLE.LEARNER].includes(user.role) &&
+                  <Popconfirm
+                    okText="Xác nhận"
+                    cancelText="Không"
+                    onConfirm={() => handleRegisCourse(item.courseId)}
+                    title="Đăng ký khóa học"
+                    description="Bạn sẽ đăng ký khóa học này ?"
+                  >
+                    <Button block type='primary' size='small'>Đăng ký</Button>
+                  </Popconfirm>}
               </Card>
             </List.Item>
           )}

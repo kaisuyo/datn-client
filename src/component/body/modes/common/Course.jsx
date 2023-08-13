@@ -1,15 +1,18 @@
 import { Badge, Card, Space } from 'antd'
 import Typography from 'antd/es/typography/Typography'
 import React from 'react'
+import { useContext } from 'react'
 import { useState } from 'react'
 import { useEffect } from 'react'
+import { UserContext } from '../../../../context/AppContext'
 import API from '../../../../context/config'
-import { COURSE_STATUS } from '../../../../context/enum'
+import { COURSE_STATUS, ROLE } from '../../../../context/enum'
 
 export default function Course({item}) {
   const { courseId } = item
   const [another, setAnother] = useState("Đang cập nhật")
   const [subject, setSubject] = useState("Đang cập nhật")
+  const { user } = useContext(UserContext)
   useEffect(() => {
     API.post(`common/courses/subInfo`, {courseId}).then(res => {
       if (res.data.value) {
@@ -36,7 +39,7 @@ export default function Course({item}) {
         <Space direction='vertical'>
           <Typography.Text>{item.description || 'Không có mô tả'}</Typography.Text>
           <Typography.Text type="secondary">Môn học: {subject}</Typography.Text>
-          <Typography.Text type="secondary">Người đăng: {another}</Typography.Text>
+          {user?.role !== ROLE.PROVIDER && <Typography.Text type="secondary">Người đăng: {another}</Typography.Text>}
         </Space>
       </Card>
       </div>
